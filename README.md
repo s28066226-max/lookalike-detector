@@ -131,14 +131,18 @@ detector/
   analyze.py         runs all checks, collects skipped ones
   verdict.py         risk score → verdict (rules only)
   explain.py         Gemma 4 plain-language bullets + translated fallback text
-  data/fallback_text.json  every finding as a plain sentence in all 7 languages
   llm.py             the one place that calls the model (VISION_BACKEND: gemini or ollama)
-  server.py          FastAPI app + JSON API
+  server.py          FastAPI app + JSON API (rate limits in public mode)
   data/brands.json   brands → official domains, names, logo hints
+  data/fallback_text.json  every finding as a plain sentence in all 7 languages
 web/index.html       single-page UI (vanilla JS, 7 languages, light and dark mode)
 web/logo.svg         logo and browser-tab icon
 demo_sites/          fake look-alike pages for the demo (localhost only)
-tests/               pytest suite
+tests/               pytest suite (no network or API key needed)
+run_demo.sh          start the demo pages + web app on a laptop with one command
+Dockerfile           public website build (PUBLIC_MODE=1, Gemini backend)
+render.yaml          Render blueprint for the free deployment
+deploy/              Hugging Face Space deploy script (needs PRO)
 ```
 
 ## Models, tools and libraries
@@ -157,9 +161,12 @@ tests/               pytest suite
 | tldextract | Split hosts into subdomain / domain / ending | BSD-3-Clause |
 | python-whois | Domain age lookup | MIT |
 | Beautiful Soup 4 | Parse the page HTML | MIT |
-| httpx | HTTP client (used by the API test client) | BSD-3-Clause |
+| httpx | HTTP client (Ollama backend, API test client) | BSD-3-Clause |
 | python-dotenv | Load settings from `.env` | BSD-3-Clause |
 | pytest | Tests | MIT |
+| Render | Hosting for the live demo (free plan) | Proprietary service ([Render Terms](https://render.com/terms)) |
+| Docker image `python:3.12-slim` | Base image for the public build | Python: PSF License; Debian packages: various open-source licenses |
+| huggingface_hub | Optional Hugging Face deploy script (not needed to run the app: `pip install huggingface_hub`) | Apache 2.0 |
 
 This project's own code is released under the [MIT License](LICENSE).
 
