@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Look-Alike Detector logo">
+  <defs>
+    <linearGradient id="shield" x1="10" y1="4" x2="54" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3d7bff"/>
+      <stop offset="1" stop-color="#4a2fc9"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield: safety -->
+  <path d="M32 3.5 54.5 11.5v18.2c0 14.1-9.4 25-22.5 30.8C18.9 54.7 9.5 43.8 9.5 29.7V11.5Z" fill="url(#shield)"/>
+  <!-- Magnifying glass: checking the website -->
+  <circle cx="29" cy="27.5" r="10.5" fill="#ffffff" fill-opacity=".12" stroke="#ffffff" stroke-width="4.2"/>
+  <path d="M36.8 35.3 44.5 43" stroke="#ffffff" stroke-width="5.2" stroke-linecap="round"/>
+  <!-- Saffron tick: verified -->
+  <path d="M24 28.2 27.6 31.8 34.2 24.6" fill="none" stroke="#ffa62b" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

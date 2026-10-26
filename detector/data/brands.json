@@ -3,7 +3,7 @@
   "sbi": {
     "display_names": ["State Bank of India", "SBI", "भारतीय स्टेट बैंक", "YONO SBI"],
     "type": "bank",
-    "official_domains": ["sbi.co.in", "onlinesbi.sbi", "onlinesbi.com", "sbi.bank.in", "sbi"],
+    "official_domains": ["sbi.co.in", "onlinesbi.sbi", "sbi.bank.in", "sbi"],
     "keywords": ["sbi", "onlinesbi", "yono", "statebank"],
     "logo_keywords": ["blue circle with keyhole", "SBI", "YONO"]
   },
@@ -25,7 +25,7 @@
     "display_names": ["Axis Bank", "एक्सिस बैंक"],
     "type": "bank",
     "official_domains": ["axisbank.com", "axis.bank.in"],
-    "keywords": ["axis", "axisbank"],
+    "keywords": ["axisbank"],
     "logo_keywords": ["burgundy triangle 'A'", "AXIS BANK"]
   },
   "kotak": {
@@ -38,7 +38,7 @@
   "pnb": {
     "display_names": ["Punjab National Bank", "PNB", "पंजाब नैशनल बैंक"],
     "type": "bank",
-    "official_domains": ["pnbindia.in", "netpnb.com", "pnb.bank.in"],
+    "official_domains": ["pnbindia.in", "pnb.bank.in"],
     "keywords": ["pnb", "pnbindia", "netpnb", "punjabnational"],
     "logo_keywords": ["maroon and yellow PNB logo", "punjab national bank"]
   },
@@ -50,7 +50,7 @@
     "logo_keywords": ["IRCTC logo", "Indian Railways"]
   },
   "uidai": {
-    "display_names": ["UIDAI", "Aadhaar", "भारतीय विशिष्ट पहचान प्राधिकरण", "आधार"],
+    "display_names": ["Aadhaar (UIDAI)", "UIDAI", "Aadhaar", "आधार (UIDAI)", "भारतीय विशिष्ट पहचान प्राधिकरण"],
     "type": "government",
     "official_domains": ["uidai.gov.in"],
     "keywords": ["uidai", "aadhaar", "aadhar", "myaadhaar"],
@@ -69,5 +69,96 @@
     "official_domains": ["epfindia.gov.in"],
     "keywords": ["epfo", "epfindia", "pfbalance"],
     "logo_keywords": ["EPFO logo", "Government of India emblem"]
+  },
+  "bob": {
+    "display_names": ["Bank of Baroda", "बैंक ऑफ़ बड़ौदा"],
+    "type": "bank",
+    "official_domains": ["bankofbaroda.in", "bankofbaroda.bank.in", "bankofbaroda.com", "bankofbaroda.co.in"],
+    "keywords": ["bankofbaroda", "barodabank", "bobworld"],
+    "logo_keywords": ["orange sunburst 'B' logo", "Bank of Baroda"]
+  },
+  "canara": {
+    "display_names": ["Canara Bank", "केनरा बैंक"],
+    "type": "bank",
+    "official_domains": ["canarabank.com", "canarabank.bank.in"],
+    "keywords": ["canara", "canarabank"],
+    "logo_keywords": ["blue and yellow triangle logo", "Canara Bank"]
+  },
+  "union": {
+    "display_names": ["Union Bank of India", "यूनियन बैंक ऑफ़ इंडिया"],
+    "type": "bank",
+    "official_domains": ["unionbankofindia.co.in", "unionbankofindia.bank.in"],
+    "keywords": ["unionbank", "unionbankofindia"],
+    "logo_keywords": ["red and blue 'U' logo", "Union Bank of India"]
+  },
+  "indusind": {
+    "display_names": ["IndusInd Bank", "इंडसइंड बैंक"],
+    "type": "bank",
+    "official_domains": ["indusind.com", "indusind.bank.in"],
+    "keywords": ["indusind"],
+    "logo_keywords": ["maroon IndusInd logo", "IndusInd Bank"]
+  },
+  "yesbank": {
+    "display_names": ["Yes Bank", "यस बैंक"],
+    "type": "bank",
+    "official_domains": ["yesbank.in", "yes.bank.in"],
+    "keywords": ["yesbank"],
+    "logo_keywords": ["blue YES BANK wordmark with red accent", "YES BANK"]
+  },
+  "rbi": {
+    "display_names": ["Reserve Bank of India", "भारतीय रिज़र्व बैंक"],
+    "type": "government",
+    "official_domains": ["rbi.org.in"],
+    "keywords": ["rbi", "reservebank"],
+    "logo_keywords": ["RBI tiger and palm tree emblem", "Reserve Bank of India"]
+  },
+  "lic": {
+    "display_names": ["LIC", "Life Insurance Corporation of India", "भारतीय जीवन बीमा निगम"],
+    "type": "government",
+    "official_domains": ["licindia.in"],
+    "keywords": ["licindia", "lifeinsurancecorporation"],
+    "logo_keywords": ["LIC hands around a lamp logo", "Life Insurance Corporation of India"]
+  },
+  "digilocker": {
+    "display_names": ["DigiLocker", "डिजिलॉकर"],
+    "type": "government",
+    "official_domains": ["digilocker.gov.in"],
+    "keywords": ["digilocker"],
+    "logo_keywords": ["DigiLocker cloud logo", "Government of India emblem"]
+  },
+  "gst": {
+    "display_names": ["GST Portal", "Goods and Services Tax", "जीएसटी पोर्टल"],
+    "type": "government",
+    "official_domains": ["gst.gov.in"],
+    "keywords": ["gstportal"],
+    "logo_keywords": ["GST logo", "Government of India emblem"]
+  },
+  "passport": {
+    "display_names": ["Passport Seva", "पासपोर्ट सेवा"],
+    "type": "government",
+    "official_domains": ["passportindia.gov.in"],
+    "keywords": ["passportindia", "passportseva"],
+    "logo_keywords": ["Passport Seva logo", "Government of India emblem"]
+  },
+  "indiapost": {
+    "display_names": ["India Post", "भारतीय डाक"],
+    "type": "government",
+    "official_domains": ["indiapost.gov.in"],
+    "keywords": ["indiapost"],
+    "logo_keywords": ["red India Post logo", "India Post"]
+  },
+  "parivahan": {
+    "display_names": ["Parivahan Sewa", "परिवहन सेवा"],
+    "type": "government",
+    "official_domains": ["parivahan.gov.in"],
+    "keywords": ["parivahan", "echallan"],
+    "logo_keywords": ["Parivahan logo", "Ministry of Road Transport"]
+  },
+  "pmkisan": {
+    "display_names": ["PM-Kisan", "पीएम किसान"],
+    "type": "government",
+    "official_domains": ["pmkisan.gov.in"],
+    "keywords": ["pmkisan"],
+    "logo_keywords": ["PM-Kisan logo", "Government of India emblem"]
   }
 }

@@ -4,8 +4,12 @@ at the rendered HTML (no AI).
 fetch_page() talks to the network; analyze_html() is pure and easy to test.
 """
 
+import ipaddress
+import os
 import re
+import socket
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import List, Optional
 from urllib.parse import urljoin, urlsplit
 
@@ -18,6 +22,32 @@ from detector.checks.domain import (
 OTP_RE = re.compile(r"\botp\b|one.?time|\bm?pin\b|verification.?code", re.I)
 CARD_RE = re.compile(r"card.?(no|num)|\bcvv\b|\bcvc\b|expiry|exp.?date|debit|credit|atm", re.I)
 IDENTITY_RE = re.compile(r"aadhaa?r|\bpan\b|pan.?(no|num|card)|date.?of.?birth|\bdob\b", re.I)
+
+# On the public website (PUBLIC_MODE=1) the browser must not reach the server's
+# own network: someone could type http://169.254.169.254/ or http://10.0.0.5/
+# to read internal services (an attack called SSRF). Only the demo pages, which
+# run inside the server and are never exposed to the internet, are allowed.
+PUBLIC_MODE = os.getenv("PUBLIC_MODE") == "1"
+DEMO_ORIGIN = "http://localhost:8001/"
+
+
+@lru_cache(maxsize=512)
+def _host_is_public(host: str) -> bool:
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror:
+        return True  # doesn't resolve: the browser can't reach anything either
+    return all(ipaddress.ip_address(info[4][0]).is_global for info in infos)
+
+
+def is_allowed_url(url: str) -> bool:
+    """May the browser load this URL? Only matters in PUBLIC_MODE."""
+    if not PUBLIC_MODE or url.startswith(DEMO_ORIGIN):
+        return True
+    parts = urlsplit(url)
+    if parts.scheme not in ("http", "https"):
+        return parts.scheme in ("data", "blob", "about")
+    return bool(parts.hostname) and _host_is_public(parts.hostname)
 
 
 @dataclass
@@ -113,25 +143,34 @@ def analyze_html(html: str, page_url: str) -> List[Signal]:
             break
 
     # Text-only brand check. Also a fallback when the vision model is off.
-    page_brand = _brand_in_page(soup)
-    if page_brand and page_brand != official:
+    # Skipped on official sites: a real bank page mentioning Aadhaar or RBI is normal.
+    page_brand = _brand_in_page(soup) if not official else None
+    if page_brand:
         signals.append(Signal("brand_in_page_text", "medium", 20,
             f"The page calls itself {brand_name(page_brand)}, but {page_site} is not its official site"))
 
     return signals
 
 
-def fetch_page(url: str, timeout_ms: int = 15000):
+# Small free servers are slow, so the timeout can be raised there (PAGE_TIMEOUT_S=40)
+PAGE_TIMEOUT_MS = int(os.getenv("PAGE_TIMEOUT_S", "15")) * 1000
+
+
+def fetch_page(url: str, timeout_ms: int = PAGE_TIMEOUT_MS):
     """Open the URL in headless Chromium. Returns (final_url, html, png, cert_ok, status)."""
     from playwright.sync_api import Error as PlaywrightError, sync_playwright
 
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        # --disable-dev-shm-usage: containers have a tiny /dev/shm, which crashes Chromium
+        browser = p.chromium.launch(args=["--disable-dev-shm-usage", "--disable-gpu"])
         try:
             cert_ok = True
             for ignore_https_errors in (False, True):
                 context = browser.new_context(viewport={"width": 1280, "height": 800},
                                               ignore_https_errors=ignore_https_errors)
+                # Checked for every request, so redirects and images can't reach internal addresses either
+                context.route("**/*", lambda route: route.continue_() if is_allowed_url(route.request.url)
+                              else route.abort("blockedbyclient"))
                 page = context.new_page()
                 try:
                     response = page.goto(url, wait_until="load", timeout=timeout_ms)
@@ -156,6 +195,9 @@ def check_page(url: str) -> PageResult:
         url = "https://" + url
     if urlsplit(url).scheme not in ("http", "https"):
         result.skipped.append("Page check (only http/https addresses can be opened)")
+        return result
+    if not is_allowed_url(url):
+        result.skipped.append("Page check (private or internal addresses are not opened on the public site)")
         return result
 
     try:

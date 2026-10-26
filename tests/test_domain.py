@@ -186,3 +186,25 @@ def test_whois_not_called_for_official_domains(monkeypatch):
 def test_pick_creation_date(value, expected_year):
     picked = domain._pick_creation_date(value)
     assert (picked.year if picked else None) == expected_year
+
+
+# --- Newer brands and .bank.in names ----------------------------------------
+
+@pytest.mark.parametrize("url, brand", [
+    ("https://bankofbaroda.bank.in", "bob"),
+    ("https://www.yes.bank.in", "yesbank"),
+    ("https://www.digilocker.gov.in", "digilocker"),
+    ("https://echallan.parivahan.gov.in", "parivahan"),
+])
+def test_newer_official_domains(url, brand):
+    assert check_domain(url, use_whois=False).official_brand == brand
+
+
+@pytest.mark.parametrize("url", ["https://yes.com", "https://axis.com", "https://gstcalculator.in"])
+def test_short_bank_in_names_do_not_flag_unrelated_sites(url):
+    assert codes(url) == set()
+
+
+def test_newer_brand_lookalikes():
+    assert "homoglyph" in codes("https://bank0fbaroda.com")
+    assert "brand_in_domain" in codes("https://echallan-pay.xyz")

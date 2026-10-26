@@ -4,124 +4,215 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Look-Alike Detector</title>
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
 <style>
   :root {
-    --bg: #f4f6fa; --card: #ffffff; --text: #1b2230; --muted: #5d6778; --border: #dfe4ec;
-    --accent: #2453c7; --accent-text: #ffffff;
-    --good: #137a3f; --good-bg: #e6f5ec; --warn: #9a5b00; --warn-bg: #fff3dc; --bad: #b42318; --bad-bg: #fdecea;
-    --chip: #eef1f6; --shadow: 0 1px 3px rgba(20, 30, 50, .08), 0 6px 24px rgba(20, 30, 50, .06);
+    --bg: #f5f7fc; --bg-hero: #eef2ff; --card: #ffffff; --text: #141a2b; --muted: #5b6579; --faint: #8a93a6;
+    --border: #e1e6f0; --chip: #eef1f7; --accent: #3b5bdb; --accent-2: #5f3dc4; --accent-text: #ffffff;
+    --good: #12805c; --good-bg: #e3f6ee; --warn: #a15c00; --warn-bg: #fff2d9; --bad: #c0262d; --bad-bg: #fdeaea;
+    --saffron: #f59f00; --ring-track: #e6e9f2;
+    --shadow: 0 1px 2px rgba(20, 30, 60, .05), 0 8px 28px rgba(20, 30, 60, .07);
+    --shadow-strong: 0 2px 4px rgba(40, 60, 140, .08), 0 14px 40px rgba(40, 60, 140, .14);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #10141b; --card: #191f29; --text: #e8ecf3; --muted: #9aa5b8; --border: #2b3442;
-      --accent: #6d95ff; --accent-text: #0d1220;
-      --good: #4fd18b; --good-bg: #15301f; --warn: #f3b443; --warn-bg: #33270f; --bad: #ff7b6e; --bad-bg: #3a1714;
-      --chip: #232b38; --shadow: none;
+      --bg: #0e121a; --bg-hero: #141a2e; --card: #171d29; --text: #e9edf5; --muted: #9ba6bb; --faint: #6f7a90;
+      --border: #273042; --chip: #212a3a; --accent: #7b96ff; --accent-2: #a084ff; --accent-text: #0b1020;
+      --good: #4fd1a1; --good-bg: #12302a; --warn: #f5b84b; --warn-bg: #33270f; --bad: #ff7d7d; --bad-bg: #3a1619;
+      --saffron: #ffb44a; --ring-track: #273042;
+      --shadow: none; --shadow-strong: 0 10px 40px rgba(0, 0, 0, .35);
     }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5;
-         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", sans-serif; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
-  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
-  .logo svg { color: var(--accent); flex: none; }
-  .langs { display: flex; background: var(--chip); border-radius: 999px; padding: 3px; }
-  .langs button { border: 0; background: none; color: var(--muted); padding: 6px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 14px; }
-  .langs button[aria-pressed="true"] { background: var(--card); color: var(--text); font-weight: 600; box-shadow: var(--shadow); }
-  h1 { font-size: clamp(24px, 5vw, 32px); margin: 32px 0 6px; line-height: 1.25; }
-  .sub { color: var(--muted); margin: 0 0 20px; }
-  form { display: flex; gap: 8px; }
-  input[type=text] { flex: 1; min-width: 0; padding: 14px 16px; font: inherit; font-size: 16px; color: var(--text);
-                     background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; }
-  input[type=text]:focus { outline: none; border-color: var(--accent); }
-  .btn { border: 0; background: var(--accent); color: var(--accent-text); font: inherit; font-weight: 600; font-size: 16px;
-         padding: 0 24px; border-radius: 12px; cursor: pointer; }
-  .btn:disabled { opacity: .6; cursor: wait; }
-  .examples { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
-  .examples button { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px;
-                     padding: 4px 10px; font: inherit; cursor: pointer; }
-  .examples button small { color: var(--muted); }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); margin-top: 20px; overflow: hidden; }
-  .loading { padding: 28px; display: flex; align-items: center; gap: 14px; color: var(--muted); }
-  .spinner { width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex: none; }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.55; -webkit-font-smoothing: antialiased;
+         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari",
+                      "Noto Sans Bengali", "Noto Sans Gujarati", "Noto Sans Tamil", "Noto Sans Telugu", sans-serif; }
+  button, input, select { font: inherit; color: inherit; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+
+  /* Hero */
+  .hero { background:
+            radial-gradient(600px 260px at 15% 0%, rgba(59, 91, 219, .16), transparent 70%),
+            radial-gradient(520px 240px at 95% 10%, rgba(245, 159, 0, .12), transparent 70%),
+            var(--bg-hero);
+          border-bottom: 1px solid var(--border); padding-bottom: 28px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 0; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 750; font-size: 18px; letter-spacing: -.01em; }
+  .logo img { width: 34px; height: 34px; }
+  .lang { position: relative; display: flex; align-items: center; }
+  .lang svg { position: absolute; left: 11px; color: var(--muted); pointer-events: none; }
+  .lang select { appearance: none; -webkit-appearance: none; background: var(--card); border: 1px solid var(--border);
+                 border-radius: 999px; padding: 7px 34px 7px 34px; font-size: 14px; cursor: pointer; box-shadow: var(--shadow); }
+  .lang::after { content: ""; position: absolute; right: 14px; width: 7px; height: 7px; border-right: 2px solid var(--muted);
+                 border-bottom: 2px solid var(--muted); transform: rotate(45deg) translateY(-3px); pointer-events: none; }
+  h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.15; letter-spacing: -.025em; margin: 22px 0 10px; max-width: 680px; }
+  h1 .hl { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--muted); font-size: 17px; margin: 0 0 22px; max-width: 640px; }
+  .search { display: flex; gap: 8px; background: var(--card); padding: 8px; border-radius: 18px; border: 1px solid var(--border);
+            box-shadow: var(--shadow-strong); }
+  .search .field { flex: 1; display: flex; align-items: center; gap: 10px; padding-left: 10px; min-width: 0; }
+  .search .field svg { color: var(--faint); flex: none; }
+  .search input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font-size: 17px; padding: 10px 0; }
+  .btn { border: 0; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 650; font-size: 16px;
+         padding: 0 26px; border-radius: 12px; cursor: pointer; min-height: 48px; transition: transform .1s, filter .15s; }
+  @media (prefers-color-scheme: dark) { .btn { color: #0b1020; } }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .65; cursor: wait; }
+  .trust { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .trust span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); background: var(--card);
+                border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px 4px 9px; }
+  .trust svg { color: var(--accent); flex: none; }
+
+  /* Examples */
+  .examples { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 22px 0 0; }
+  .ex-group { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px 12px; }
+  .ex-group h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); display: flex; align-items: center; gap: 6px; }
+  .ex-group h3 i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .ex-group button { display: block; width: 100%; text-align: left; border: 0; background: var(--chip); border-radius: 9px; padding: 6px 10px;
+                     margin-top: 6px; cursor: pointer; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ex-group button:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* Cards */
+  main { padding: 24px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
+  .pad { padding: 20px 22px; }
+  h2 { font-size: 17px; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
+  .fade { animation: fade .35s ease-out both; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .fade { animation: none; } .spinner { animation-duration: 2s; } }
+
+  /* Progress */
+  .steps { list-style: none; margin: 0; padding: 6px 0; }
+  .steps li { display: flex; align-items: center; gap: 12px; padding: 10px 22px; color: var(--faint); font-size: 16px; }
+  .steps li.active { color: var(--text); font-weight: 600; }
+  .steps li.done { color: var(--muted); }
+  .dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); flex: none; display: grid; place-items: center; }
+  .steps li.done .dot { background: var(--good); border-color: var(--good); color: var(--card); }
+  .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; flex: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .verdict { padding: 22px 24px; display: flex; gap: 16px; align-items: center; }
-  .verdict.genuine { background: var(--good-bg); color: var(--good); }
-  .verdict.suspicious { background: var(--warn-bg); color: var(--warn); }
-  .verdict.likely_fake { background: var(--bad-bg); color: var(--bad); }
-  .verdict svg { flex: none; }
-  .verdict .label { font-size: 26px; font-weight: 800; line-height: 1.2; }
-  .verdict .line { color: var(--text); margin-top: 2px; }
-  .meta { padding: 16px 24px; display: grid; gap: 6px; border-bottom: 1px solid var(--border); font-size: 15px; }
-  .meta .k { color: var(--muted); }
-  .host { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
-  .score { display: flex; align-items: center; gap: 10px; }
-  .bar { flex: 1; max-width: 220px; height: 8px; background: var(--chip); border-radius: 99px; overflow: hidden; }
-  .bar span { display: block; height: 100%; border-radius: 99px; }
-  section { padding: 18px 24px; border-bottom: 1px solid var(--border); }
-  section:last-child { border-bottom: 0; }
-  h2 { font-size: 17px; margin: 0 0 10px; }
-  .why ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 16px; }
-  .source { margin-top: 12px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+
+  /* Verdict */
+  .verdict { display: flex; align-items: center; gap: 18px; padding: 22px; }
+  .verdict.genuine { background: var(--good-bg); --tone: var(--good); }
+  .verdict.suspicious { background: var(--warn-bg); --tone: var(--warn); }
+  .verdict.likely_fake { background: var(--bad-bg); --tone: var(--bad); }
+  .v-icon { color: var(--tone); flex: none; }
+  .v-text { flex: 1; min-width: 0; }
+  .v-label { color: var(--tone); font-size: clamp(26px, 5vw, 34px); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; }
+  .v-line { margin-top: 4px; font-size: 16px; }
+  .ring { flex: none; position: relative; width: 84px; height: 84px; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring .num { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; line-height: 1.05; }
+  .ring b { font-size: 22px; color: var(--tone); }
+  .ring small { display: block; font-size: 10px; color: var(--muted); max-width: 70px; }
+  .addr { padding: 14px 22px 16px; display: grid; gap: 6px; font-size: 15px; border-top: 1px solid var(--border); }
+  .addr .k { color: var(--muted); margin-right: 6px; }
+  .host { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; word-break: break-all; }
+  .host .dim { color: var(--faint); }
+  .host b { background: var(--chip); padding: 1px 5px; border-radius: 6px; }
+
+  /* Why */
+  .why ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .why li { display: flex; gap: 10px; font-size: 16.5px; }
+  .why li::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 10px; border-radius: 50%; background: var(--accent); }
+  .source { margin-top: 14px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .source .spinner { width: 14px; height: 14px; border-width: 2px; }
-  .shot img { width: 100%; max-width: 420px; border: 1px solid var(--border); border-radius: 10px; cursor: zoom-in; display: block; }
-  .gemma { font-size: 14px; color: var(--muted); margin-top: 8px; }
-  details summary { cursor: pointer; font-weight: 600; }
-  .sig { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin-top: 12px; font-size: 14px; align-items: baseline; }
+  .gemma-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--chip); border-radius: 999px; padding: 2px 9px; }
+
+  /* Three checks */
+  .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .check { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow); border-top: 4px solid var(--tone); }
+  .check.bad { --tone: var(--bad); } .check.warn { --tone: var(--warn); } .check.ok { --tone: var(--good); } .check.skip { --tone: var(--border); }
+  .c-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .c-head strong { font-size: 15px; }
+  .pill { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 9px; color: var(--tone); background: var(--chip); white-space: nowrap; }
+  .check.skip .pill { color: var(--faint); }
+  .check ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; font-size: 14px; }
+  .check li { display: flex; gap: 8px; }
+  .check li svg { flex: none; margin-top: 3px; }
+  .check .none { color: var(--muted); font-size: 14px; }
+  .check .gemma { margin-top: 10px; font-size: 13px; color: var(--muted); border-top: 1px dashed var(--border); padding-top: 8px; }
+
+  /* Screenshot in a browser frame */
+  .browser { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; max-width: 520px; background: var(--chip); }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--border); display: inline-block; margin-right: 4px; }
+  .urlpill { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; background: var(--card); border-radius: 8px; padding: 3px 9px;
+             font-family: ui-monospace, Menlo, monospace; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .browser img { display: block; width: 100%; cursor: zoom-in; }
+
+  /* Technical details */
+  details summary { cursor: pointer; font-weight: 650; padding: 16px 22px; list-style-position: inside; }
+  details[open] summary { border-bottom: 1px solid var(--border); }
+  .sig { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; padding: 14px 22px; font-size: 14px; align-items: baseline; }
   .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; text-align: center; white-space: nowrap; font-family: ui-monospace, Menlo, monospace; }
-  .tag.high { background: var(--bad-bg); color: var(--bad); }
-  .tag.medium { background: var(--warn-bg); color: var(--warn); }
-  .tag.low, .tag.info { background: var(--chip); color: var(--muted); }
-  .tag.good { background: var(--good-bg); color: var(--good); }
-  .code { color: var(--muted); font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
-  .skipped { margin-top: 12px; font-size: 14px; color: var(--muted); }
-  .error { padding: 20px 24px; color: var(--bad); }
-  dialog { border: 0; padding: 0; border-radius: 12px; max-width: 95vw; background: var(--card); }
+  .tag.high { background: var(--bad-bg); color: var(--bad); } .tag.medium { background: var(--warn-bg); color: var(--warn); }
+  .tag.low, .tag.info { background: var(--chip); color: var(--muted); } .tag.good { background: var(--good-bg); color: var(--good); }
+  .code { color: var(--faint); font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .skipped { padding: 0 22px 16px; font-size: 14px; color: var(--muted); }
+  .error { color: var(--bad); }
+
+  /* Tips */
+  .tips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .tip { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; font-size: 14.5px; }
+  .tip .ti { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; margin-bottom: 10px;
+             background: linear-gradient(135deg, rgba(59, 91, 219, .14), rgba(95, 61, 196, .14)); color: var(--accent); }
+  .tips-title { font-size: 18px; margin: 28px 0 12px; }
+
+  dialog { border: 0; padding: 0; border-radius: 14px; max-width: 95vw; background: var(--card); }
   dialog img { display: block; max-width: 95vw; max-height: 90vh; }
   dialog::backdrop { background: rgba(0, 0, 0, .7); }
-  footer { margin-top: 32px; font-size: 13px; color: var(--muted); text-align: center; }
+  footer { margin: 30px 0 36px; font-size: 13px; color: var(--faint); text-align: center; }
+
+  @media (max-width: 720px) {
+    .examples, .checks, .tips { grid-template-columns: 1fr; }
+  }
   @media (max-width: 520px) {
-    form { flex-direction: column; }
-    .btn { padding: 14px; }
-    .verdict { padding: 18px 16px; }
-    .meta, section { padding-left: 16px; padding-right: 16px; }
+    .search { flex-direction: column; }
+    .search .field { padding: 0 6px; }
+    .verdict { padding: 18px 16px; gap: 12px; }
+    .v-icon svg { width: 36px; height: 36px; }
+    .ring { width: 68px; height: 68px; } .ring svg { width: 68px; height: 68px; }
+    .pad, .addr, .sig, details summary { padding-left: 16px; padding-right: 16px; }
+    .logo span { font-size: 16px; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="logo">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><circle cx="11" cy="11" r="3"/><path d="M13.2 13.2L16 16"/></svg>
-      <span data-t="brand">Look-Alike Detector</span>
+<div class="hero">
+  <div class="wrap">
+    <div class="top">
+      <div class="logo"><img src="/static/logo.svg" alt=""><span data-t="brand"></span></div>
+      <label class="lang">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+        <select id="lang" aria-label="Language">
+          <option value="en">English</option><option value="hi">हिंदी</option><option value="mr">मराठी</option>
+          <option value="bn">বাংলা</option><option value="gu">ગુજરાતી</option><option value="ta">தமிழ்</option><option value="te">తెలుగు</option>
+        </select>
+      </label>
     </div>
-    <div class="langs" role="group" aria-label="Language">
-      <button data-lang="en">English</button>
-      <button data-lang="hi">हिंदी</button>
-      <button data-lang="mr">मराठी</button>
-    </div>
-  </header>
 
-  <h1 data-t="title"></h1>
-  <p class="sub" data-t="subtitle"></p>
+    <h1 id="title"></h1>
+    <p class="sub" data-t="subtitle"></p>
 
-  <form id="form">
-    <input id="url" type="text" autocomplete="off" spellcheck="false" inputmode="url">
-    <button class="btn" id="go" type="submit" data-t="check"></button>
-  </form>
-  <div class="examples">
-    <span data-t="try"></span>
-    <button type="button" data-url="http://localhost:8001/sbi/">SBI <small>· demo fake</small></button>
-    <button type="button" data-url="http://localhost:8001/incometax/">Income Tax <small>· demo fake</small></button>
-    <button type="button" data-url="http://localhost:8001/aadhaar/">Aadhaar <small>· demo fake</small></button>
-    <button type="button" data-url="https://www.onlinesbi.sbi">onlinesbi.sbi <small>· real</small></button>
-    <button type="button" data-url="https://onlinesbl.com">onlinesbl.com</button>
-    <button type="button" data-url="https://sbi.secure-login.xyz">sbi.secure-login.xyz</button>
+    <form class="search" id="form">
+      <div class="field">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>
+        <input id="url" type="text" autocomplete="off" spellcheck="false" inputmode="url">
+      </div>
+      <button class="btn" id="go" type="submit" data-t="check"></button>
+    </form>
+
+    <div class="trust" id="trust"></div>
+    <div class="examples" id="examples"></div>
   </div>
+</div>
 
-  <div id="out"></div>
-
+<div class="wrap">
+  <main id="out"></main>
+  <h2 class="tips-title" data-t="tipsTitle"></h2>
+  <div class="tips" id="tips"></div>
   <footer data-t="footer"></footer>
 </div>
 <dialog id="zoom"><img alt=""></dialog>
@@ -129,79 +220,218 @@
 <script>
 const T = {
   en: {
-    brand: "Look-Alike Detector",
-    title: "Is this website real or a look-alike?",
-    subtitle: "Paste the link of a bank or government website. We check the address, the page and its look, and tell you in plain words.",
-    placeholder: "Paste a website address, e.g. onlinesbi.sbi",
-    check: "Check", try: "Try:",
-    steps: ["Checking the address…", "Opening the page…", "Looking at the page with Gemma 4…"],
+    brand: "Look-Alike Detector", titleA: "Is this website ", titleHl: "real or a look-alike?", titleB: "",
+    subtitle: "Paste a link from an SMS, e-mail or WhatsApp. We check the address, the page and how it looks, and explain the warning signs in simple words.",
+    placeholder: "Paste a website address, e.g. onlinesbi.sbi", check: "Check",
+    trust: ["Open-source AI: Gemma 4", "Can also run offline", "7 languages", "22 banks & government sites"],
+    groups: { demo: "Demo fakes", real: "Real sites", tricky: "Tricky addresses" },
+    steps: ["Checking the address", "Opening the page", "Gemma 4 is looking at the page"],
     verdict: { genuine: "Genuine", suspicious: "Suspicious", likely_fake: "Likely fake" },
-    lineOfficial: "This is the official website of {brand}.",
-    lineGenuine: "No warning signs found.",
+    lineOfficial: "This is the official website of {brand}.", lineGenuine: "No warning signs found.",
     lineSuspicious: "Be careful. Don't type any details until you are sure.",
-    lineFake: "This looks like a copy of {brand}. Don't enter any details.",
-    lineFakeNoBrand: "This looks like a fake website. Don't enter any details.",
-    website: "Website", endedAt: "Ended up at", risk: "Risk score",
+    lineFake: "This looks like a copy of {brand}. Don't enter any details.", lineFakeNoBrand: "This looks like a fake website. Don't enter any details.",
+    website: "Website", actual: "Actual website", endedAt: "Ended up at", risk: "risk",
     why: "Why?", writing: "Gemma 4 is writing a simple explanation…",
     byModel: "Explained by Gemma 4 (open-weight AI)", byFallback: "Basic explanation (AI not available right now)",
-    shot: "What the page looks like",
-    gemmaSaw: "Gemma 4 recognises: {brand} ({conf}% sure)", gemmaNone: "Gemma 4 recognises: no known bank or government brand",
+    ollama: "running on this laptop, offline", gemini: "via the Gemini API",
+    checks: { address: "Address", page: "Page", visual: "Look (Gemma 4)" }, noProblems: "No problems found", skippedShort: "Not checked",
+    shot: "What the page looks like", gemmaSaw: "Gemma 4 recognises: {brand} ({conf}% sure)", gemmaNone: "Gemma 4 sees no known bank or government brand",
     details: "Technical details", skipped: "Checks skipped",
-    error: "Something went wrong. Please try again.", empty: "Please enter a website address.",
+    error: "Something went wrong. Please try again.", busy: "Too many checks right now. Please wait a minute and try again.", empty: "Please enter a website address.",
+    tipsTitle: "3 habits that keep you safe",
+    tips: ["Type your bank's address yourself. Don't open links from SMS or WhatsApp.",
+           "Indian bank addresses now end in .bank.in, and most government sites end in .gov.in.",
+           "No bank or government office will ever ask for your OTP or PIN."],
     footer: "Runs on Gemma 4, an open-weight AI model · Open source (MIT) · The AI never decides the verdict on its own"
   },
   hi: {
-    brand: "नकली वेबसाइट पहचानें",
-    title: "यह वेबसाइट असली है या नकली?",
-    subtitle: "किसी बैंक या सरकारी वेबसाइट का लिंक डालें। हम पता, पेज और उसका रूप जाँचकर आसान भाषा में बताएँगे।",
-    placeholder: "वेबसाइट का पता डालें, जैसे onlinesbi.sbi",
-    check: "जाँचें", try: "आज़माएँ:",
-    steps: ["पता जाँच रहे हैं…", "पेज खोल रहे हैं…", "Gemma 4 से पेज देख रहे हैं…"],
+    brand: "नकली वेबसाइट पहचानें", titleA: "यह वेबसाइट ", titleHl: "असली है या नकली?", titleB: "",
+    subtitle: "SMS, ई-मेल या WhatsApp से मिला लिंक डालें। हम पता, पेज और उसका रूप जाँचकर आसान भाषा में चेतावनी संकेत बताएँगे।",
+    placeholder: "वेबसाइट का पता डालें, जैसे onlinesbi.sbi", check: "जाँचें",
+    trust: ["ओपन-सोर्स AI: Gemma 4", "बिना इंटरनेट भी चल सकता है", "7 भाषाएँ", "22 बैंक और सरकारी साइटें"],
+    groups: { demo: "डेमो नकली साइटें", real: "असली साइटें", tricky: "चालाक पते" },
+    steps: ["पता जाँच रहे हैं", "पेज खोल रहे हैं", "Gemma 4 पेज देख रहा है"],
     verdict: { genuine: "असली", suspicious: "संदिग्ध", likely_fake: "शायद नकली" },
-    lineOfficial: "यह {brand} की आधिकारिक वेबसाइट है।",
-    lineGenuine: "कोई चेतावनी संकेत नहीं मिला।",
+    lineOfficial: "यह {brand} की आधिकारिक वेबसाइट है।", lineGenuine: "कोई चेतावनी संकेत नहीं मिला।",
     lineSuspicious: "सावधान रहें। पक्का होने तक कोई जानकारी न डालें।",
-    lineFake: "यह {brand} की नकल लगती है। कोई भी जानकारी न डालें।",
-    lineFakeNoBrand: "यह नकली वेबसाइट लगती है। कोई भी जानकारी न डालें।",
-    website: "वेबसाइट", endedAt: "आखिर में खुली", risk: "जोखिम स्कोर",
+    lineFake: "यह {brand} की नकल लगती है। कोई भी जानकारी न डालें।", lineFakeNoBrand: "यह नकली वेबसाइट लगती है। कोई भी जानकारी न डालें।",
+    website: "वेबसाइट", actual: "असली वेबसाइट", endedAt: "आखिर में खुली", risk: "जोखिम",
     why: "क्यों?", writing: "Gemma 4 आसान भाषा में समझा रहा है…",
     byModel: "Gemma 4 (ओपन AI मॉडल) द्वारा समझाया गया", byFallback: "सामान्य जानकारी (AI अभी उपलब्ध नहीं)",
-    shot: "पेज कैसा दिखता है",
-    gemmaSaw: "Gemma 4 को दिखा: {brand} ({conf}% यकीन)", gemmaNone: "Gemma 4 को कोई बैंक या सरकारी ब्रांड नहीं दिखा",
+    ollama: "इसी लैपटॉप पर, बिना इंटरनेट", gemini: "Gemini API के ज़रिए",
+    checks: { address: "पता", page: "पेज", visual: "रूप (Gemma 4)" }, noProblems: "कोई समस्या नहीं मिली", skippedShort: "जाँच नहीं हुई",
+    shot: "पेज कैसा दिखता है", gemmaSaw: "Gemma 4 को दिखा: {brand} ({conf}% यकीन)", gemmaNone: "Gemma 4 को कोई बैंक या सरकारी ब्रांड नहीं दिखा",
     details: "तकनीकी जानकारी", skipped: "छोड़ी गई जाँच",
-    error: "कुछ गलत हुआ। कृपया फिर से कोशिश करें।", empty: "कृपया वेबसाइट का पता डालें।",
+    error: "कुछ गलत हुआ। कृपया फिर से कोशिश करें।", busy: "अभी बहुत ज़्यादा जाँचें हो रही हैं। एक मिनट रुककर फिर कोशिश करें।", empty: "कृपया वेबसाइट का पता डालें।",
+    tipsTitle: "सुरक्षित रहने की 3 आदतें",
+    tips: ["बैंक का पता खुद टाइप करें। SMS या WhatsApp के लिंक न खोलें।",
+           "भारतीय बैंकों के पते अब .bank.in पर खत्म होते हैं, और ज़्यादातर सरकारी साइटें .gov.in पर।",
+           "कोई भी बैंक या सरकारी दफ़्तर आपसे कभी OTP या PIN नहीं माँगता।"],
     footer: "Gemma 4 ओपन AI मॉडल पर चलता है · ओपन सोर्स (MIT) · फ़ैसला AI अकेले नहीं करता"
   },
   mr: {
-    brand: "बनावट वेबसाइट ओळखा",
-    title: "ही वेबसाइट खरी आहे की बनावट?",
-    subtitle: "बँक किंवा सरकारी वेबसाइटची लिंक टाका. आम्ही पत्ता, पेज आणि त्याचे रूप तपासून सोप्या भाषेत सांगू.",
-    placeholder: "वेबसाइटचा पत्ता टाका, उदा. onlinesbi.sbi",
-    check: "तपासा", try: "वापरून पाहा:",
-    steps: ["पत्ता तपासत आहोत…", "पेज उघडत आहोत…", "Gemma 4 ने पेज पाहत आहोत…"],
+    brand: "बनावट वेबसाइट ओळखा", titleA: "ही वेबसाइट ", titleHl: "खरी आहे की बनावट?", titleB: "",
+    subtitle: "SMS, ई-मेल किंवा WhatsApp वरून आलेली लिंक टाका. आम्ही पत्ता, पेज आणि त्याचे रूप तपासून धोक्याची चिन्हे सोप्या भाषेत सांगू.",
+    placeholder: "वेबसाइटचा पत्ता टाका, उदा. onlinesbi.sbi", check: "तपासा",
+    trust: ["ओपन-सोर्स AI: Gemma 4", "इंटरनेटशिवायही चालू शकते", "7 भाषा", "22 बँका आणि सरकारी साइट्स"],
+    groups: { demo: "डेमो बनावट साइट्स", real: "खऱ्या साइट्स", tricky: "फसवे पत्ते" },
+    steps: ["पत्ता तपासत आहोत", "पेज उघडत आहोत", "Gemma 4 पेज पाहत आहे"],
     verdict: { genuine: "खरी", suspicious: "संशयास्पद", likely_fake: "बहुधा बनावट" },
-    lineOfficial: "ही {brand} ची अधिकृत वेबसाइट आहे.",
-    lineGenuine: "कोणतीही धोक्याची चिन्हे आढळली नाहीत.",
+    lineOfficial: "ही {brand} ची अधिकृत वेबसाइट आहे.", lineGenuine: "कोणतीही धोक्याची चिन्हे आढळली नाहीत.",
     lineSuspicious: "सावध राहा. खात्री होईपर्यंत कोणतीही माहिती टाकू नका.",
-    lineFake: "ही {brand} ची नक्कल दिसते. कोणतीही माहिती टाकू नका.",
-    lineFakeNoBrand: "ही बनावट वेबसाइट दिसते. कोणतीही माहिती टाकू नका.",
-    website: "वेबसाइट", endedAt: "शेवटी उघडली", risk: "धोका गुण",
+    lineFake: "ही {brand} ची नक्कल दिसते. कोणतीही माहिती टाकू नका.", lineFakeNoBrand: "ही बनावट वेबसाइट दिसते. कोणतीही माहिती टाकू नका.",
+    website: "वेबसाइट", actual: "प्रत्यक्ष वेबसाइट", endedAt: "शेवटी उघडली", risk: "धोका",
     why: "का?", writing: "Gemma 4 सोप्या भाषेत समजावत आहे…",
     byModel: "Gemma 4 (ओपन AI मॉडेल) ने समजावले", byFallback: "साधी माहिती (AI सध्या उपलब्ध नाही)",
-    shot: "पेज कसे दिसते",
-    gemmaSaw: "Gemma 4 ला दिसले: {brand} ({conf}% खात्री)", gemmaNone: "Gemma 4 ला कोणताही बँक किंवा सरकारी ब्रँड दिसला नाही",
+    ollama: "याच लॅपटॉपवर, इंटरनेटशिवाय", gemini: "Gemini API द्वारे",
+    checks: { address: "पत्ता", page: "पेज", visual: "रूप (Gemma 4)" }, noProblems: "कोणतीही समस्या आढळली नाही", skippedShort: "तपासले नाही",
+    shot: "पेज कसे दिसते", gemmaSaw: "Gemma 4 ला दिसले: {brand} ({conf}% खात्री)", gemmaNone: "Gemma 4 ला कोणताही बँक किंवा सरकारी ब्रँड दिसला नाही",
     details: "तांत्रिक माहिती", skipped: "वगळलेल्या तपासण्या",
-    error: "काहीतरी चुकले. कृपया पुन्हा प्रयत्न करा.", empty: "कृपया वेबसाइटचा पत्ता टाका.",
+    error: "काहीतरी चुकले. कृपया पुन्हा प्रयत्न करा.", busy: "सध्या खूप तपासण्या होत आहेत. एक मिनिट थांबून पुन्हा प्रयत्न करा.", empty: "कृपया वेबसाइटचा पत्ता टाका.",
+    tipsTitle: "सुरक्षित राहण्याच्या 3 सवयी",
+    tips: ["बँकेचा पत्ता स्वतः टाइप करा. SMS किंवा WhatsApp वरील लिंक उघडू नका.",
+           "भारतीय बँकांचे पत्ते आता .bank.in ने संपतात, आणि बहुतेक सरकारी साइट्स .gov.in ने.",
+           "कोणतीही बँक किंवा सरकारी कार्यालय तुमच्याकडे कधीही OTP किंवा PIN मागत नाही."],
     footer: "Gemma 4 ओपन AI मॉडेलवर चालते · ओपन सोर्स (MIT) · निर्णय AI एकटे घेत नाही"
+  },
+  bn: {
+    brand: "নকল ওয়েবসাইট শনাক্তকারী", titleA: "এই ওয়েবসাইটটি ", titleHl: "আসল না নকল?", titleB: "",
+    subtitle: "SMS, ই-মেল বা WhatsApp-এ পাওয়া লিংকটি দিন। আমরা ঠিকানা, পেজ ও তার চেহারা যাচাই করে সহজ ভাষায় সতর্কসংকেত জানাব।",
+    placeholder: "ওয়েবসাইটের ঠিকানা দিন, যেমন onlinesbi.sbi", check: "যাচাই করুন",
+    trust: ["ওপেন-সোর্স AI: Gemma 4", "ইন্টারনেট ছাড়াও চলতে পারে", "৭টি ভাষা", "২২টি ব্যাংক ও সরকারি সাইট"],
+    groups: { demo: "ডেমো নকল সাইট", real: "আসল সাইট", tricky: "চালাক ঠিকানা" },
+    steps: ["ঠিকানা যাচাই হচ্ছে", "পেজ খোলা হচ্ছে", "Gemma 4 পেজটি দেখছে"],
+    verdict: { genuine: "আসল", suspicious: "সন্দেহজনক", likely_fake: "সম্ভবত নকল" },
+    lineOfficial: "এটি {brand}-এর অফিসিয়াল ওয়েবসাইট।", lineGenuine: "কোনো সতর্কসংকেত পাওয়া যায়নি।",
+    lineSuspicious: "সাবধান। নিশ্চিত না হওয়া পর্যন্ত কোনো তথ্য দেবেন না।",
+    lineFake: "এটি {brand}-এর নকল বলে মনে হচ্ছে। কোনো তথ্য দেবেন না।", lineFakeNoBrand: "এটি নকল ওয়েবসাইট বলে মনে হচ্ছে। কোনো তথ্য দেবেন না।",
+    website: "ওয়েবসাইট", actual: "আসল ওয়েবসাইট", endedAt: "শেষে খুলেছে", risk: "ঝুঁকি",
+    why: "কেন?", writing: "Gemma 4 সহজ ভাষায় ব্যাখ্যা লিখছে…",
+    byModel: "Gemma 4 (ওপেন AI মডেল) ব্যাখ্যা করেছে", byFallback: "সাধারণ ব্যাখ্যা (AI এখন পাওয়া যাচ্ছে না)",
+    ollama: "এই ল্যাপটপেই, ইন্টারনেট ছাড়া", gemini: "Gemini API-এর মাধ্যমে",
+    checks: { address: "ঠিকানা", page: "পেজ", visual: "চেহারা (Gemma 4)" }, noProblems: "কোনো সমস্যা পাওয়া যায়নি", skippedShort: "যাচাই হয়নি",
+    shot: "পেজটি দেখতে কেমন", gemmaSaw: "Gemma 4 চিনেছে: {brand} ({conf}% নিশ্চিত)", gemmaNone: "Gemma 4 কোনো ব্যাংক বা সরকারি ব্র্যান্ড চেনেনি",
+    details: "প্রযুক্তিগত তথ্য", skipped: "বাদ পড়া যাচাই",
+    error: "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।", busy: "এখন অনেক বেশি যাচাই হচ্ছে। এক মিনিট অপেক্ষা করে আবার চেষ্টা করুন।", empty: "ওয়েবসাইটের ঠিকানা দিন।",
+    tipsTitle: "নিরাপদ থাকার ৩টি অভ্যাস",
+    tips: ["ব্যাংকের ঠিকানা নিজে টাইপ করুন। SMS বা WhatsApp-এর লিংক খুলবেন না।",
+           "ভারতের ব্যাংকগুলোর ঠিকানা এখন .bank.in দিয়ে শেষ হয়, আর বেশিরভাগ সরকারি সাইট .gov.in দিয়ে।",
+           "কোনো ব্যাংক বা সরকারি অফিস কখনও আপনার OTP বা PIN চায় না।"],
+    footer: "Gemma 4 ওপেন AI মডেলে চলে · ওপেন সোর্স (MIT) · সিদ্ধান্ত AI একা নেয় না"
+  },
+  gu: {
+    brand: "નકલી વેબસાઇટ ઓળખો", titleA: "આ વેબસાઇટ ", titleHl: "સાચી છે કે નકલી?", titleB: "",
+    subtitle: "SMS, ઈ-મેલ કે WhatsApp માં આવેલી લિંક નાખો. અમે સરનામું, પેજ અને તેનો દેખાવ તપાસીને સરળ ભાષામાં ચેતવણીનાં ચિહ્નો જણાવીશું.",
+    placeholder: "વેબસાઇટનું સરનામું નાખો, જેમ કે onlinesbi.sbi", check: "તપાસો",
+    trust: ["ઓપન-સોર્સ AI: Gemma 4", "ઇન્ટરનેટ વગર પણ ચાલી શકે છે", "7 ભાષાઓ", "22 બેંકો અને સરકારી સાઇટ્સ"],
+    groups: { demo: "ડેમો નકલી સાઇટ્સ", real: "સાચી સાઇટ્સ", tricky: "છેતરામણાં સરનામાં" },
+    steps: ["સરનામું તપાસી રહ્યા છીએ", "પેજ ખોલી રહ્યા છીએ", "Gemma 4 પેજ જોઈ રહ્યું છે"],
+    verdict: { genuine: "સાચી", suspicious: "શંકાસ્પદ", likely_fake: "કદાચ નકલી" },
+    lineOfficial: "આ {brand} ની સત્તાવાર વેબસાઇટ છે.", lineGenuine: "કોઈ ચેતવણીનાં ચિહ્નો મળ્યાં નથી.",
+    lineSuspicious: "સાવધાન રહો. ખાતરી ન થાય ત્યાં સુધી કોઈ માહિતી ન નાખો.",
+    lineFake: "આ {brand} ની નકલ લાગે છે. કોઈ માહિતી ન નાખો.", lineFakeNoBrand: "આ નકલી વેબસાઇટ લાગે છે. કોઈ માહિતી ન નાખો.",
+    website: "વેબસાઇટ", actual: "ખરેખરી વેબસાઇટ", endedAt: "છેલ્લે ખૂલી", risk: "જોખમ",
+    why: "કેમ?", writing: "Gemma 4 સરળ ભાષામાં સમજાવી રહ્યું છે…",
+    byModel: "Gemma 4 (ઓપન AI મોડેલ) દ્વારા સમજાવેલું", byFallback: "સામાન્ય માહિતી (AI હાલમાં ઉપલબ્ધ નથી)",
+    ollama: "આ જ લેપટોપ પર, ઇન્ટરનેટ વગર", gemini: "Gemini API દ્વારા",
+    checks: { address: "સરનામું", page: "પેજ", visual: "દેખાવ (Gemma 4)" }, noProblems: "કોઈ સમસ્યા મળી નથી", skippedShort: "તપાસ થઈ નથી",
+    shot: "પેજ કેવું દેખાય છે", gemmaSaw: "Gemma 4 એ ઓળખ્યું: {brand} ({conf}% ખાતરી)", gemmaNone: "Gemma 4 ને કોઈ બેંક કે સરકારી બ્રાન્ડ દેખાઈ નથી",
+    details: "ટેકનિકલ માહિતી", skipped: "છોડેલી તપાસ",
+    error: "કંઈક ખોટું થયું. ફરી પ્રયાસ કરો.", busy: "હાલમાં ઘણી બધી તપાસ થઈ રહી છે. એક મિનિટ રાહ જોઈને ફરી પ્રયાસ કરો.", empty: "કૃપા કરીને વેબસાઇટનું સરનામું નાખો.",
+    tipsTitle: "સુરક્ષિત રહેવાની 3 આદતો",
+    tips: ["બેંકનું સરનામું જાતે ટાઇપ કરો. SMS કે WhatsApp ની લિંક ન ખોલો.",
+           "ભારતીય બેંકોનાં સરનામાં હવે .bank.in થી પૂરાં થાય છે, અને મોટાભાગની સરકારી સાઇટ્સ .gov.in થી.",
+           "કોઈ બેંક કે સરકારી કચેરી ક્યારેય તમારો OTP કે PIN માંગતી નથી."],
+    footer: "Gemma 4 ઓપન AI મોડેલ પર ચાલે છે · ઓપન સોર્સ (MIT) · નિર્ણય AI એકલું લેતું નથી"
+  },
+  ta: {
+    brand: "போலி இணையதளக் கண்டறிதல்", titleA: "இந்த இணையதளம் ", titleHl: "உண்மையானதா, போலியானதா?", titleB: "",
+    subtitle: "SMS, மின்னஞ்சல் அல்லது WhatsApp-இல் வந்த இணைப்பை ஒட்டுங்கள். முகவரி, பக்கம், அதன் தோற்றம் ஆகியவற்றைச் சரிபார்த்து எச்சரிக்கை அறிகுறிகளை எளிய மொழியில் சொல்வோம்.",
+    placeholder: "இணையதள முகவரியை ஒட்டுங்கள், எ.கா. onlinesbi.sbi", check: "சரிபார்",
+    trust: ["ஓப்பன்-சோர்ஸ் AI: Gemma 4", "இணையம் இல்லாமலும் இயங்க முடியும்", "7 மொழிகள்", "22 வங்கிகள் & அரசு தளங்கள்"],
+    groups: { demo: "டெமோ போலி தளங்கள்", real: "உண்மையான தளங்கள்", tricky: "ஏமாற்று முகவரிகள்" },
+    steps: ["முகவரியைச் சரிபார்க்கிறோம்", "பக்கத்தைத் திறக்கிறோம்", "Gemma 4 பக்கத்தைப் பார்க்கிறது"],
+    verdict: { genuine: "உண்மையானது", suspicious: "சந்தேகத்திற்குரியது", likely_fake: "போலியாக இருக்கலாம்" },
+    lineOfficial: "இது {brand} இன் அதிகாரப்பூர்வ இணையதளம்.", lineGenuine: "எச்சரிக்கை அறிகுறிகள் எதுவும் இல்லை.",
+    lineSuspicious: "கவனமாக இருங்கள். உறுதியாகும் வரை எந்தத் தகவலையும் உள்ளிட வேண்டாம்.",
+    lineFake: "இது {brand} இன் போலி போலத் தெரிகிறது. எந்தத் தகவலையும் உள்ளிட வேண்டாம்.", lineFakeNoBrand: "இது போலி இணையதளம் போலத் தெரிகிறது. எந்தத் தகவலையும் உள்ளிட வேண்டாம்.",
+    website: "இணையதளம்", actual: "உண்மையான இணையதளம்", endedAt: "இறுதியில் திறந்தது", risk: "ஆபத்து",
+    why: "ஏன்?", writing: "Gemma 4 எளிய விளக்கம் எழுதுகிறது…",
+    byModel: "Gemma 4 (ஓப்பன் AI மாடல்) விளக்கியது", byFallback: "பொதுவான விளக்கம் (AI இப்போது கிடைக்கவில்லை)",
+    ollama: "இதே லேப்டாப்பில், இணையம் இல்லாமல்", gemini: "Gemini API மூலம்",
+    checks: { address: "முகவரி", page: "பக்கம்", visual: "தோற்றம் (Gemma 4)" }, noProblems: "எந்தப் பிரச்சினையும் இல்லை", skippedShort: "சரிபார்க்கப்படவில்லை",
+    shot: "பக்கம் எப்படித் தெரிகிறது", gemmaSaw: "Gemma 4 கண்டது: {brand} ({conf}% உறுதி)", gemmaNone: "Gemma 4 எந்த வங்கி அல்லது அரசு பிராண்டையும் காணவில்லை",
+    details: "தொழில்நுட்ப விவரங்கள்", skipped: "தவிர்க்கப்பட்ட சோதனைகள்",
+    error: "ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.", busy: "இப்போது அதிகமான சோதனைகள் நடக்கின்றன. ஒரு நிமிடம் காத்திருந்து மீண்டும் முயற்சிக்கவும்.", empty: "இணையதள முகவரியை உள்ளிடவும்.",
+    tipsTitle: "பாதுகாப்பாக இருக்க 3 பழக்கங்கள்",
+    tips: ["வங்கியின் முகவரியை நீங்களே தட்டச்சு செய்யுங்கள். SMS அல்லது WhatsApp இணைப்புகளைத் திறக்க வேண்டாம்.",
+           "இந்திய வங்கி முகவரிகள் இப்போது .bank.in என முடிகின்றன; பெரும்பாலான அரசு தளங்கள் .gov.in என முடிகின்றன.",
+           "எந்த வங்கியும் அரசு அலுவலகமும் உங்கள் OTP அல்லது PIN-ஐ ஒருபோதும் கேட்காது."],
+    footer: "Gemma 4 ஓப்பன் AI மாடலில் இயங்குகிறது · ஓப்பன் சோர்ஸ் (MIT) · முடிவை AI தனியாக எடுப்பதில்லை"
+  },
+  te: {
+    brand: "నకిలీ వెబ్‌సైట్ గుర్తింపు", titleA: "ఈ వెబ్‌సైట్ ", titleHl: "అసలైనదా, నకిలీదా?", titleB: "",
+    subtitle: "SMS, ఈ-మెయిల్ లేదా WhatsApp లో వచ్చిన లింక్‌ను పేస్ట్ చేయండి. చిరునామా, పేజీ, దాని రూపం తనిఖీ చేసి హెచ్చరిక సంకేతాలను సులభమైన భాషలో చెబుతాం.",
+    placeholder: "వెబ్‌సైట్ చిరునామా పేస్ట్ చేయండి, ఉదా. onlinesbi.sbi", check: "తనిఖీ చేయండి",
+    trust: ["ఓపెన్-సోర్స్ AI: Gemma 4", "ఇంటర్నెట్ లేకుండా కూడా పనిచేయగలదు", "7 భాషలు", "22 బ్యాంకులు & ప్రభుత్వ సైట్లు"],
+    groups: { demo: "డెమో నకిలీ సైట్లు", real: "అసలు సైట్లు", tricky: "మోసపూరిత చిరునామాలు" },
+    steps: ["చిరునామా తనిఖీ చేస్తున్నాం", "పేజీ తెరుస్తున్నాం", "Gemma 4 పేజీని చూస్తోంది"],
+    verdict: { genuine: "అసలైనది", suspicious: "అనుమానాస్పదం", likely_fake: "నకిలీ కావచ్చు" },
+    lineOfficial: "ఇది {brand} యొక్క అధికారిక వెబ్‌సైట్.", lineGenuine: "హెచ్చరిక సంకేతాలు ఏవీ కనిపించలేదు.",
+    lineSuspicious: "జాగ్రత్త. ఖచ్చితంగా తెలిసే వరకు ఏ వివరాలూ ఇవ్వకండి.",
+    lineFake: "ఇది {brand} కు నకిలీలా కనిపిస్తోంది. ఏ వివరాలూ ఇవ్వకండి.", lineFakeNoBrand: "ఇది నకిలీ వెబ్‌సైట్‌లా కనిపిస్తోంది. ఏ వివరాలూ ఇవ్వకండి.",
+    website: "వెబ్‌సైట్", actual: "అసలు వెబ్‌సైట్", endedAt: "చివరికి తెరుచుకుంది", risk: "ప్రమాదం",
+    why: "ఎందుకు?", writing: "Gemma 4 సులభమైన వివరణ రాస్తోంది…",
+    byModel: "Gemma 4 (ఓపెన్ AI మోడల్) వివరించింది", byFallback: "సాధారణ వివరణ (AI ప్రస్తుతం అందుబాటులో లేదు)",
+    ollama: "ఈ ల్యాప్‌టాప్‌లోనే, ఇంటర్నెట్ లేకుండా", gemini: "Gemini API ద్వారా",
+    checks: { address: "చిరునామా", page: "పేజీ", visual: "రూపం (Gemma 4)" }, noProblems: "ఏ సమస్యలూ కనిపించలేదు", skippedShort: "తనిఖీ చేయలేదు",
+    shot: "పేజీ ఎలా కనిపిస్తుంది", gemmaSaw: "Gemma 4 గుర్తించింది: {brand} ({conf}% నమ్మకం)", gemmaNone: "Gemma 4 కి ఏ బ్యాంక్ లేదా ప్రభుత్వ బ్రాండ్ కనిపించలేదు",
+    details: "సాంకేతిక వివరాలు", skipped: "వదిలేసిన తనిఖీలు",
+    error: "ఏదో పొరపాటు జరిగింది. మళ్లీ ప్రయత్నించండి.", busy: "ప్రస్తుతం చాలా తనిఖీలు జరుగుతున్నాయి. ఒక నిమిషం ఆగి మళ్లీ ప్రయత్నించండి.", empty: "దయచేసి వెబ్‌సైట్ చిరునామా ఇవ్వండి.",
+    tipsTitle: "సురక్షితంగా ఉండటానికి 3 అలవాట్లు",
+    tips: ["బ్యాంక్ చిరునామాను మీరే టైప్ చేయండి. SMS లేదా WhatsApp లింక్‌లు తెరవకండి.",
+           "భారతీయ బ్యాంకుల చిరునామాలు ఇప్పుడు .bank.in తో ముగుస్తాయి; చాలా ప్రభుత్వ సైట్లు .gov.in తో ముగుస్తాయి.",
+           "ఏ బ్యాంకు లేదా ప్రభుత్వ కార్యాలయం మీ OTP లేదా PIN ని ఎప్పుడూ అడగదు."],
+    footer: "Gemma 4 ఓపెన్ AI మోడల్‌పై నడుస్తుంది · ఓపెన్ సోర్స్ (MIT) · నిర్ణయాన్ని AI ఒంటరిగా తీసుకోదు"
   }
 };
 
-const ICONS = {
-  genuine: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>',
-  suspicious: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
-  likely_fake: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
+const EXAMPLES = [
+  { group: "demo", label: "SBI NetBanking", url: "http://localhost:8001/sbi/" },
+  { group: "demo", label: "Income Tax refund", url: "http://localhost:8001/incometax/" },
+  { group: "demo", label: "Aadhaar KYC", url: "http://localhost:8001/aadhaar/" },
+  { group: "real", label: "onlinesbi.sbi", url: "https://www.onlinesbi.sbi" },
+  { group: "real", label: "bankofbaroda.bank.in", url: "https://bankofbaroda.bank.in" },
+  { group: "tricky", label: "onlinesbl.com", url: "https://onlinesbl.com" },
+  { group: "tricky", label: "sbi.secure-login.xyz", url: "https://sbi.secure-login.xyz" },
+  { group: "tricky", label: "echallan-pay.xyz", url: "https://echallan-pay.xyz" },
+];
+const GROUP_COLOR = { demo: "var(--bad)", real: "var(--good)", tricky: "var(--warn)" };
+
+const svg = (w, path, extra = "") => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${path}</svg>`;
+const ICON = {
+  genuine: svg(48, '<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
+  suspicious: svg(48, '<path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/>'),
+  likely_fake: svg(48, '<circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>'),
+  check: svg(16, '<path d="M5 12.5l4.5 4.5L19 7.5"/>', 'style="color:var(--good)"'),
+  warn: svg(16, '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/>', 'style="color:var(--tone)"'),
+  tick: svg(14, '<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  sparkle: svg(18, '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>', 'style="color:var(--accent)"'),
+  lock: svg(12, '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>', 'style="color:var(--good)"'),
+  unlock: svg(12, '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 017.5-2"/>', 'style="color:var(--bad)"'),
 };
-const SCORE_COLOR = { genuine: "var(--good)", suspicious: "var(--warn)", likely_fake: "var(--bad)" };
+const TRUST_ICONS = [
+  '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  '<path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c0 3-3 7-6 8"/><path d="M13 21l4-9 4 9M14.5 18h5"/>',
+  '<path d="M3 21h18M4 10h16M12 3l9 5H3z"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/>',
+];
+const TIP_ICONS = [
+  '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+  '<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/>',
+  '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4M12 15v2"/>',
+];
+const RING_COLOR = { genuine: "var(--good)", suspicious: "var(--warn)", likely_fake: "var(--bad)" };
 
 const $ = (s) => document.querySelector(s);
 const out = $("#out");
@@ -209,7 +439,8 @@ let lang = "en";
 let report = null;          // last /api/check result
 let explanations = {};      // lang -> {bullets, source} or {pending: true}
 let checkId = 0;            // ignore replies that belong to an older check
-let stepTimer = null;
+let stepTimers = [];
+let loadingStep = 0;
 
 try { lang = localStorage.getItem("lang") || "en"; } catch (e) {}
 if (!T[lang]) lang = "en";
@@ -217,40 +448,61 @@ if (!T[lang]) lang = "en";
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
-function fill(template, vars) {
-  return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+function fill(template, vars) { return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? ""); }
+
+function renderStatic() {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = t[el.dataset.t]; });
+  $("#title").innerHTML = `${esc(t.titleA)}<span class="hl">${esc(t.titleHl)}</span>${esc(t.titleB)}`;
+  $("#url").placeholder = t.placeholder;
+  $("#lang").value = lang;
+  $("#trust").innerHTML = t.trust.map((x, i) => `<span>${svg(14, TRUST_ICONS[i])}${esc(x)}</span>`).join("");
+  $("#examples").innerHTML = ["demo", "real", "tricky"].map((g) => `
+    <div class="ex-group"><h3><i style="background:${GROUP_COLOR[g]}"></i>${esc(t.groups[g])}</h3>
+      ${EXAMPLES.filter((e) => e.group === g).map((e) => `<button type="button" data-url="${esc(e.url)}" title="${esc(e.url)}">${esc(e.label)}</button>`).join("")}
+    </div>`).join("");
+  $("#tips").innerHTML = t.tips.map((x, i) => `<div class="tip"><div class="ti">${svg(20, TIP_ICONS[i])}</div>${esc(x)}</div>`).join("");
 }
 
 function setLang(l) {
   lang = l;
   try { localStorage.setItem("lang", l); } catch (e) {}
-  document.documentElement.lang = l;
-  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = T[l][el.dataset.t]; });
-  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.lang === l));
-  $("#url").placeholder = T[l].placeholder;
+  renderStatic();
   if (report) { render(); requestExplanation(l); }
+  else if (out.querySelector(".steps")) drawLoading();
+  else if (out.querySelector(".error")) out.innerHTML = "";
 }
 
-function showLoading() {
-  let i = 0;
-  const draw = () => {
-    out.innerHTML = `<div class="card loading"><div class="spinner"></div><span>${esc(T[lang].steps[Math.min(i, 2)])}</span></div>`;
-    i++;
-  };
-  draw();
-  clearInterval(stepTimer);
-  stepTimer = setInterval(draw, 2500);
+// --- Loading: three steps that mirror the three checks -------------------------
+function drawLoading() {
+  const t = T[lang];
+  out.innerHTML = `<div class="card fade"><ul class="steps">${t.steps.map((s, i) => {
+    const state = i < loadingStep ? "done" : i === loadingStep ? "active" : "";
+    const mark = state === "done" ? `<span class="dot">${ICON.tick}</span>` : state === "active" ? `<span class="spinner"></span>` : `<span class="dot"></span>`;
+    return `<li class="${state}">${mark}${esc(s)}</li>`;
+  }).join("")}</ul></div>`;
+}
+function startLoading() {
+  stepTimers.forEach(clearTimeout);
+  loadingStep = 0;
+  drawLoading();
+  // The API answers once, so the first two steps advance on a timer; the last waits for the reply.
+  stepTimers = [setTimeout(() => { loadingStep = 1; drawLoading(); }, 900),
+                setTimeout(() => { loadingStep = 2; drawLoading(); }, 3200)];
 }
 
 async function runCheck(url) {
   url = url.trim();
-  if (!url) { out.innerHTML = `<div class="card error">${esc(T[lang].empty)}</div>`; return; }
+  if (!url) { out.innerHTML = `<div class="card pad error fade">${esc(T[lang].empty)}</div>`; return; }
   const id = ++checkId;
   report = null; explanations = {};
   $("#go").disabled = true;
-  showLoading();
+  startLoading();
+  out.scrollIntoView({ behavior: "smooth", block: "start" });
   try {
     const res = await fetch("/api/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+    if (res.status === 429) { out.innerHTML = `<div class="card pad error fade">${esc(T[lang].busy)}</div>`; return; }
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     if (id !== checkId) return;
@@ -258,9 +510,9 @@ async function runCheck(url) {
     render();
     requestExplanation(lang);
   } catch (e) {
-    if (id === checkId) out.innerHTML = `<div class="card error">${esc(T[lang].error)}</div>`;
+    if (id === checkId) out.innerHTML = `<div class="card pad error fade">${esc(T[lang].error)}</div>`;
   } finally {
-    if (id === checkId) { clearInterval(stepTimer); $("#go").disabled = false; }
+    if (id === checkId) { stepTimers.forEach(clearTimeout); $("#go").disabled = false; }
   }
 }
 
@@ -268,7 +520,8 @@ async function requestExplanation(l) {
   if (!report || explanations[l]) return;
   const id = checkId;
   explanations[l] = { pending: true };
-  const body = { host: report.host, verdict: report.verdict, brand: report.brand, signals: report.signals, lang: l };
+  const body = { host: report.host, verdict: report.verdict, brand: report.brand, lang: l,
+                 signals: report.signals.map(({ code, severity, points, detail }) => ({ code, severity, points, detail })) };
   try {
     const res = await fetch("/api/explain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (!res.ok) throw new Error(res.status);
@@ -282,6 +535,7 @@ async function requestExplanation(l) {
   if (l === lang) renderWhy();
 }
 
+// --- Result --------------------------------------------------------------------
 function verdictLine(r) {
   const t = T[lang], brand = r.brand_names[lang];
   if (r.verdict === "genuine") return r.official_brand ? fill(t.lineOfficial, { brand }) : t.lineGenuine;
@@ -289,61 +543,98 @@ function verdictLine(r) {
   return brand ? fill(t.lineFake, { brand }) : t.lineFakeNoBrand;
 }
 
+// "sbi.secure-login.xyz" -> dim "sbi." and highlight "secure-login.xyz": the part that shows who really owns the site.
+function hostHtml(r) {
+  const h = r.host, reg = r.registered_domain;
+  if (reg && h.endsWith(reg) && h !== reg) return `<span class="dim">${esc(h.slice(0, -reg.length))}</span><b>${esc(reg)}</b>`;
+  return `<b>${esc(h)}</b>`;
+}
+
+function ring(r) {
+  const c = 2 * Math.PI * 34, filled = (r.score / 100) * c;
+  const arc = filled > 0 ? `<circle cx="42" cy="42" r="34" fill="none" stroke="${RING_COLOR[r.verdict]}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${filled} ${c}"/>` : "";
+  return `<div class="ring" title="${esc(T[lang].risk)}: ${r.score}/100" aria-label="${esc(T[lang].risk)}: ${r.score}/100">
+    <svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="none" stroke="var(--ring-track)" stroke-width="8"/>${arc}</svg>
+    <div class="num"><div><b>${r.score}</b><small>/100</small></div></div></div>`;
+}
+
+function checkCard(kind) {
+  const r = report, t = T[lang];
+  const sigs = r.signals.filter((s) => s.check === kind && s.points !== 0);
+  const skipped = kind === "page" ? r.skipped.some((s) => s.startsWith("Page check"))
+                : kind === "visual" ? !r.visual_brand : false;
+  const bad = sigs.filter((s) => s.points > 0);
+  let cls = "ok", pill = `✓`;
+  if (bad.length) { cls = bad.some((s) => s.severity === "high") ? "bad" : "warn"; pill = `${bad.length} ⚠`; }
+  else if (skipped) { cls = "skip"; pill = "–"; }
+  const items = sigs.map((s) => `<li>${s.points < 0 ? ICON.check : ICON.warn}<span>${esc(s.plain[lang])}</span></li>`).join("");
+  let body = items ? `<ul>${items}</ul>` : `<div class="none">${esc(skipped ? t.skippedShort : t.noProblems)}</div>`;
+  if (kind === "visual" && r.visual_brand) {
+    const vb = r.visual_brand;
+    const seen = vb.brand ? fill(t.gemmaSaw, { brand: r.visual_brand_names[lang], conf: Math.round(vb.confidence * 100) }) : t.gemmaNone;
+    body += `<div class="gemma">${esc(seen)}<br>${esc(t[r.backend] || r.backend)}</div>`;
+  }
+  return `<div class="check ${cls}"><div class="c-head"><strong>${esc(t.checks[kind])}</strong><span class="pill">${esc(pill)}</span></div>${body}</div>`;
+}
+
 function renderWhy() {
   const box = $("#why");
   if (!box || !report) return;
-  const ex = explanations[lang];
-  const t = T[lang];
+  const ex = explanations[lang], t = T[lang];
   const bullets = ex && ex.bullets ? ex.bullets : report.quick_explanation[lang];
   let source;
   if (!ex || ex.pending) source = `<div class="spinner"></div>${esc(t.writing)}`;
-  else source = esc(ex.source === "model" ? t.byModel : t.byFallback);
-  box.innerHTML = `<h2>${esc(t.why)}</h2><ul>${bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul><div class="source">${source}</div>`;
+  else if (ex.source === "model") source = `<span class="gemma-badge">${ICON.sparkle}${esc(t.byModel)}</span>${esc(t[report.backend] || report.backend)}`;
+  else source = esc(t.byFallback);
+  box.innerHTML = `<h2>${ICON.sparkle}${esc(t.why)}</h2><ul>${bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul><div class="source">${source}</div>`;
 }
 
 function render() {
   const r = report, t = T[lang];
-  const vb = r.visual_brand;
-  let gemma = "";
-  if (vb) {
-    gemma = vb.brand
-      ? fill(t.gemmaSaw, { brand: r.visual_brand_names[lang], conf: Math.round(vb.confidence * 100) })
-      : t.gemmaNone;
-  }
+  const ended = r.final_url && r.final_url.replace(/\/$/, "") !== r.url.replace(/\/$/, "")
+    ? `<div><span class="k">${esc(t.endedAt)}:</span><span class="host">${esc(r.final_url)}</span></div>` : "";
+  const actual = !r.official_brand && r.registered_domain && r.registered_domain !== r.host
+    ? `<div><span class="k">${esc(t.actual)}:</span><span class="host"><b>${esc(r.registered_domain)}</b></span></div>` : "";
+  const shownUrl = r.final_url || r.url;
+  const secure = shownUrl.startsWith("https://");
   const signals = r.signals.map((s) => `
       <span class="tag ${esc(s.severity)}">${s.points > 0 ? "+" : ""}${s.points}</span>
       <span>${esc(s.detail)} <span class="code">${esc(s.code)}</span></span>`).join("");
-  const skipped = r.skipped.length
-    ? `<div class="skipped"><strong>${esc(t.skipped)}:</strong><br>${r.skipped.map(esc).join("<br>")}</div>` : "";
-  const ended = r.final_url && r.final_url.replace(/\/$/, "") !== r.url.replace(/\/$/, "")
-    ? `<div><span class="k">${esc(t.endedAt)}:</span> <span class="host">${esc(r.final_url)}</span></div>` : "";
+  const skipped = r.skipped.length ? `<div class="skipped"><strong>${esc(t.skipped)}:</strong><br>${r.skipped.map(esc).join("<br>")}</div>` : "";
 
   out.innerHTML = `
-    <div class="card">
+    <div class="card fade">
       <div class="verdict ${esc(r.verdict)}">
-        ${ICONS[r.verdict]}
-        <div><div class="label">${esc(t.verdict[r.verdict])}</div><div class="line">${esc(verdictLine(r))}</div></div>
+        <div class="v-icon">${ICON[r.verdict]}</div>
+        <div class="v-text"><div class="v-label">${esc(t.verdict[r.verdict])}</div><div class="v-line">${esc(verdictLine(r))}</div></div>
+        ${ring(r)}
       </div>
-      <div class="meta">
-        <div><span class="k">${esc(t.website)}:</span> <span class="host">${esc(r.host)}</span></div>
-        ${ended}
-        <div class="score"><span class="k">${esc(t.risk)}:</span> <strong>${r.score}/100</strong>
-          <div class="bar"><span style="width:${r.score}%;background:${SCORE_COLOR[r.verdict]}"></span></div></div>
+      <div class="addr">
+        <div><span class="k">${esc(t.website)}:</span><span class="host">${hostHtml(r)}</span></div>
+        ${actual}${ended}
       </div>
-      <section class="why" id="why"></section>
-      ${r.screenshot ? `<section class="shot"><h2>${esc(t.shot)}</h2><img src="${r.screenshot}" alt="${esc(t.shot)}">${gemma ? `<div class="gemma">${esc(gemma)}</div>` : ""}</section>` : ""}
-      <section><details><summary>${esc(t.details)}</summary><div class="sig">${signals}</div>${skipped}</details></section>
-    </div>`;
+    </div>
+    <div class="card pad why fade" id="why"></div>
+    <div class="checks fade">${checkCard("address")}${checkCard("page")}${checkCard("visual")}</div>
+    ${r.screenshot ? `
+    <div class="card pad fade"><h2>${esc(t.shot)}</h2>
+      <div class="browser"><div class="bar"><span><i></i><i></i><i></i></span>
+        <span class="urlpill">${secure ? ICON.lock : ICON.unlock}${esc(shownUrl)}</span></div>
+        <img src="${r.screenshot}" alt="${esc(t.shot)}"></div></div>` : ""}
+    <details class="card fade"><summary>${esc(t.details)}</summary><div class="sig">${signals}</div>${skipped}</details>`;
   renderWhy();
-  const img = out.querySelector(".shot img");
+  const img = out.querySelector(".browser img");
   if (img) img.addEventListener("click", () => { $("#zoom img").src = img.src; $("#zoom").showModal(); });
 }
 
 $("#form").addEventListener("submit", (e) => { e.preventDefault(); runCheck($("#url").value); });
-document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
-document.querySelectorAll("[data-url]").forEach((b) => b.addEventListener("click", () => { $("#url").value = b.dataset.url; runCheck(b.dataset.url); }));
+$("#lang").addEventListener("change", (e) => setLang(e.target.value));
+$("#examples").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-url]");
+  if (b) { $("#url").value = b.dataset.url; runCheck(b.dataset.url); }
+});
 $("#zoom").addEventListener("click", () => $("#zoom").close());
-setLang(lang);
+renderStatic();
 </script>
 </body>
 </html>

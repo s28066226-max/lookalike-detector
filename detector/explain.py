@@ -16,7 +16,15 @@ from typing import List, Optional, Tuple
 from detector import llm
 from detector.checks.domain import Signal, load_brands
 
-LANGUAGES = {"en": "English", "hi": "Hindi (Devanagari script)", "mr": "Marathi (Devanagari script)"}
+LANGUAGES = {
+    "en": "English",
+    "hi": "Hindi (Devanagari script)",
+    "mr": "Marathi (Devanagari script)",
+    "bn": "Bengali (Bengali script)",
+    "gu": "Gujarati (Gujarati script)",
+    "ta": "Tamil (Tamil script)",
+    "te": "Telugu (Telugu script)",
+}
 VERDICT_WORDS = {"genuine": "genuine (no warning signs)", "suspicious": "suspicious",
                  "likely_fake": "likely fake (a look-alike website)"}
 FALLBACK_FILE = Path(__file__).resolve().parent / "data" / "fallback_text.json"
@@ -30,7 +38,8 @@ def _fallback_text() -> dict:
 
 
 def brand_name_in(brand_id: Optional[str], lang: str) -> str:
-    """Brand name in the user's language: the Devanagari name for hi/mr if we have one."""
+    """Brand name in the user's language: the Devanagari name for hi/mr if we have one.
+    Other languages use the English name, which people widely recognise (SBI, HDFC Bank)."""
     if not brand_id or brand_id not in load_brands():
         return ""
     names = load_brands()[brand_id]["display_names"]
@@ -72,16 +81,21 @@ def parse_bullets(text: str) -> List[str]:
     return bullets[:5]
 
 
+def signal_text(signal: Signal, brand_id: Optional[str], lang: str) -> str:
+    """One finding as a plain sentence in the user's language (fixed text, no model)."""
+    entry = _fallback_text()["signals"].get(signal.code)
+    if not entry:
+        return signal.detail
+    return entry[lang].replace("{brand}", brand_name_in(brand_id, lang) or "the bank")
+
+
 def fallback_bullets(signals: List[Signal], verdict: str, brand_id: Optional[str], lang: str) -> List[str]:
-    texts = _fallback_text()
-    brand = brand_name_in(brand_id, lang) or "the bank"
     bullets = []
     for s in _relevant(signals):
-        entry = texts["signals"].get(s.code)
-        sentence = entry[lang].replace("{brand}", brand) if entry else s.detail
+        sentence = signal_text(s, brand_id, lang)
         if sentence not in bullets:
             bullets.append(sentence)
-    advice = texts["advice"].get(verdict)
+    advice = _fallback_text()["advice"].get(verdict)
     return bullets[:4] + ([advice[lang]] if advice else [])
 
 

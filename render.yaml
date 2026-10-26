@@ -1,0 +1,16 @@
+# Render Blueprint: free web service built from the Dockerfile.
+# In Render: New -> Blueprint -> pick this repo, then paste GEMINI_API_KEY when asked.
+services:
+  - type: web
+    name: lookalike-detector
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false        # secret: Render asks for it, it is never stored in the repo
+      - key: BROWSER_LIMIT
+        value: "1"         # 512 MB memory: one browser at a time
+      - key: PAGE_TIMEOUT_S
+        value: "40"        # the free CPU is slow

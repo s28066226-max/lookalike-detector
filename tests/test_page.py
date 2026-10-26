@@ -67,3 +67,9 @@ def test_brand_name_needs_whole_word():
 def test_hindi_brand_name_in_heading():
     html = "<h1>भारतीय स्टेट बैंक</h1>"
     assert "brand_in_page_text" in codes(html, "https://example.com/")
+
+
+def test_official_site_mentioning_another_brand_is_fine():
+    # Real bank pages often mention Aadhaar, RBI etc. That is not impersonation.
+    html = "<title>Bank of Baroda</title><h2>Link your Aadhaar</h2>"
+    assert codes(html, "https://bankofbaroda.bank.in/") == set()

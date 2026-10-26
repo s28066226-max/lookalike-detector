@@ -7,7 +7,7 @@ from detector import explain as explain_module
 from detector import llm, server
 from detector.analyze import Report
 from detector.checks.domain import Signal
-from detector.explain import explain, fallback_bullets, parse_bullets
+from detector.explain import LANGUAGES, explain, fallback_bullets, parse_bullets
 
 FAKE_SIGNALS = [
     Signal("no_https", "medium", 15, "The connection is not encrypted"),
@@ -29,7 +29,7 @@ def test_parse_bullets_rejects_empty():
         parse_bullets("[]")
 
 
-@pytest.mark.parametrize("lang", ["en", "hi", "mr"])
+@pytest.mark.parametrize("lang", list(LANGUAGES))
 def test_fallback_has_every_language(lang):
     bullets = fallback_bullets(FAKE_SIGNALS, "likely_fake", "sbi", lang)
     # biggest signal first, info signals skipped, advice last
@@ -53,7 +53,7 @@ def test_every_scoring_signal_has_fallback_text():
         "brand_in_page_text", "visual_brand_mismatch",
     ]
     for code in scoring_codes:
-        assert set(texts["signals"][code]) == {"en", "hi", "mr"}, code
+        assert set(texts["signals"][code]) == set(LANGUAGES), code
 
 
 def test_explain_uses_model_reply(monkeypatch):
@@ -100,7 +100,7 @@ def test_check_endpoint(monkeypatch):
     assert data["verdict"] == "suspicious"
     assert data["screenshot"].startswith("data:image/png;base64,")
     assert data["brand_names"]["hi"] == "भारतीय स्टेट बैंक"
-    assert set(data["quick_explanation"]) == {"en", "hi", "mr"}
+    assert set(data["quick_explanation"]) == set(LANGUAGES)
 
 
 def test_explain_endpoint(monkeypatch):
@@ -108,4 +108,31 @@ def test_explain_endpoint(monkeypatch):
     body = {"host": "x.com", "verdict": "likely_fake", "brand": "sbi", "lang": "hi",
             "signals": [{"code": "no_https", "severity": "medium", "points": 15, "detail": "no https"}]}
     data = client.post("/api/explain", json=body).json()
-    assert data == {"bullets": ["एक", "दो", "तीन"], "source": "model", "model": llm.model_name(), "lang": "hi"}
+    assert data == {"bullets": ["एक", "दो", "तीन"], "source": "model", "model": llm.model_name(),
+                    "backend": llm.backend_name(), "lang": "hi"}
+
+
+def test_every_language_has_advice_for_every_verdict():
+    for verdict, texts in explain_module._fallback_text()["advice"].items():
+        assert set(texts) == set(LANGUAGES), verdict
+
+
+def test_non_devanagari_languages_use_english_brand_name():
+    assert explain_module.brand_name_in("sbi", "ta") == "State Bank of India"
+
+
+def test_check_endpoint_groups_and_translates_signals(monkeypatch):
+    signals = [Signal("brand_in_subdomain", "high", 40, "x"), Signal("asks_otp", "low", 10, "y"),
+               Signal("visual_brand_mismatch", "high", 45, "z")]
+    fake = Report(url="u", host="sbi.x.xyz", registered_domain="x.xyz", official_brand=None,
+                  target_brand="sbi", signals=signals, score=95, verdict="likely_fake")
+    monkeypatch.setattr(server, "analyze", lambda url: fake)
+    data = client.post("/api/check", json={"url": "u"}).json()
+    assert [s["check"] for s in data["signals"]] == ["address", "page", "visual"]
+    assert "भारतीय स्टेट बैंक" in data["signals"][0]["plain"]["hi"]
+    assert set(data["signals"][1]["plain"]) == set(LANGUAGES)
+
+
+def test_logo_is_served():
+    res = client.get("/static/logo.svg")
+    assert res.status_code == 200 and "<svg" in res.text

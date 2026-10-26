@@ -165,7 +165,9 @@ def _find_lookalike(label: str, suffix: str):
                 continue
             off = _extract(official)
             if label == off.domain:
-                if suffix != off.suffix:
+                # .bank.in names are short common words (yes.bank.in, axis.bank.in),
+                # so yes.com or axis.com are not look-alikes just for sharing them.
+                if suffix != off.suffix and off.suffix != "bank.in":
                     return brand_id, official, "wrong_tld"
                 continue
             if skeleton(label) == skeleton(off.domain):

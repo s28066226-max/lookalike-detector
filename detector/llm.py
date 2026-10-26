@@ -2,15 +2,19 @@
 
 VISION_BACKEND in .env picks the backend:
   gemini  Gemma 4 through the Gemini API (GEMINI_API_KEY, GEMINI_MODEL)
-  ollama  Gemma 4 running locally through Ollama (OLLAMA_MODEL) - not built yet
+  ollama  Gemma 4 running locally through Ollama (OLLAMA_MODEL): works offline,
+          nothing leaves the machine
 """
 
+import base64
 import os
 from typing import Optional
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434")
 
 
 class ModelUnavailable(Exception):
@@ -23,7 +27,7 @@ def backend_name() -> str:
 
 def model_name() -> str:
     if backend_name() == "ollama":
-        return os.getenv("OLLAMA_MODEL", "gemma4")
+        return os.getenv("OLLAMA_MODEL", "gemma4:e4b")
     return os.getenv("GEMINI_MODEL", "gemma-4-26b-a4b-it")
 
 
@@ -32,6 +36,8 @@ def generate(prompt: str, image_png: Optional[bytes] = None, timeout_s: int = 60
     backend = backend_name()
     if backend == "gemini":
         return _generate_gemini(prompt, image_png, timeout_s)
+    if backend == "ollama":
+        return _generate_ollama(prompt, image_png, timeout_s)
     raise ModelUnavailable(f"backend '{backend}' is not available")
 
 
@@ -66,8 +72,44 @@ def _generate_gemini(prompt: str, image_png: Optional[bytes], timeout_s: int) ->
     return ""
 
 
+def _generate_ollama(prompt: str, image_png: Optional[bytes], timeout_s: int) -> str:
+    import httpx
+
+    model = model_name()
+    body = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "think": False,  # skip Gemma 4's reasoning step: much faster, same answers for our tasks
+        "options": {"temperature": 0},
+        "keep_alive": "30m",  # keep the model in memory so the next check is fast
+    }
+    if image_png:
+        body["images"] = [base64.b64encode(image_png).decode("ascii")]
+    try:
+        response = httpx.post(f"{OLLAMA_URL}/api/generate", json=body, timeout=timeout_s)
+        if response.status_code == 400 and "think" in response.text:
+            # Older Ollama versions don't know the "think" option
+            body.pop("think")
+            response = httpx.post(f"{OLLAMA_URL}/api/generate", json=body, timeout=timeout_s)
+    except httpx.ConnectError:
+        raise ModelUnavailable("Ollama is not running (open the Ollama app)")
+    if response.status_code == 404:
+        raise ModelUnavailable(f"model '{model}' is not downloaded (run: ollama pull {model})")
+    response.raise_for_status()
+    return response.json().get("response", "")
+
+
 def list_gemma_models():
-    """Model ids containing 'gemma' that this API key can use (to fill GEMINI_MODEL)."""
+    """Gemma models the current backend can use (to fill GEMINI_MODEL / OLLAMA_MODEL)."""
+    if backend_name() == "ollama":
+        import httpx
+
+        try:
+            tags = httpx.get(f"{OLLAMA_URL}/api/tags", timeout=5).json()
+        except httpx.ConnectError:
+            raise ModelUnavailable("Ollama is not running (open the Ollama app)")
+        return sorted(m["name"] for m in tags.get("models", []) if "gemma" in m["name"])
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise ModelUnavailable("GEMINI_API_KEY is not set in .env")
