@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Demo look-alike pages (localhost only)</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+    footer { margin-top: 32px; background: #c00; color: #fff; padding: 10px; font-weight: bold; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Demo look-alike pages</h1>
+  <p>Fake pages used to demonstrate the Look-Alike Website Detector. Serve them only on localhost:
+     <code>python -m http.server 8001 --directory demo_sites</code>. None of the forms send anything.</p>
+  <ul>
+    <li><a href="sbi/">sbi/</a>: fake SBI NetBanking login (form posts to another site)</li>
+    <li><a href="incometax/">incometax/</a>: fake Income Tax refund page (asks for PAN and card details)</li>
+    <li><a href="aadhaar/">aadhaar/</a>: fake Aadhaar KYC update (form sends to an e-mail address)</li>
+  </ul>
+  <footer>DEMO – NOT A REAL BANK OR GOVERNMENT SITE</footer>
+</body>
+</html>

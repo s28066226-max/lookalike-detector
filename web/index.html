@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Look-Alike Detector</title>
+<style>
+  :root {
+    --bg: #f4f6fa; --card: #ffffff; --text: #1b2230; --muted: #5d6778; --border: #dfe4ec;
+    --accent: #2453c7; --accent-text: #ffffff;
+    --good: #137a3f; --good-bg: #e6f5ec; --warn: #9a5b00; --warn-bg: #fff3dc; --bad: #b42318; --bad-bg: #fdecea;
+    --chip: #eef1f6; --shadow: 0 1px 3px rgba(20, 30, 50, .08), 0 6px 24px rgba(20, 30, 50, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10141b; --card: #191f29; --text: #e8ecf3; --muted: #9aa5b8; --border: #2b3442;
+      --accent: #6d95ff; --accent-text: #0d1220;
+      --good: #4fd18b; --good-bg: #15301f; --warn: #f3b443; --warn-bg: #33270f; --bad: #ff7b6e; --bad-bg: #3a1714;
+      --chip: #232b38; --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5;
+         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
+  .logo svg { color: var(--accent); flex: none; }
+  .langs { display: flex; background: var(--chip); border-radius: 999px; padding: 3px; }
+  .langs button { border: 0; background: none; color: var(--muted); padding: 6px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 14px; }
+  .langs button[aria-pressed="true"] { background: var(--card); color: var(--text); font-weight: 600; box-shadow: var(--shadow); }
+  h1 { font-size: clamp(24px, 5vw, 32px); margin: 32px 0 6px; line-height: 1.25; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  form { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; min-width: 0; padding: 14px 16px; font: inherit; font-size: 16px; color: var(--text);
+                     background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; }
+  input[type=text]:focus { outline: none; border-color: var(--accent); }
+  .btn { border: 0; background: var(--accent); color: var(--accent-text); font: inherit; font-weight: 600; font-size: 16px;
+         padding: 0 24px; border-radius: 12px; cursor: pointer; }
+  .btn:disabled { opacity: .6; cursor: wait; }
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .examples button { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px;
+                     padding: 4px 10px; font: inherit; cursor: pointer; }
+  .examples button small { color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); margin-top: 20px; overflow: hidden; }
+  .loading { padding: 28px; display: flex; align-items: center; gap: 14px; color: var(--muted); }
+  .spinner { width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .verdict { padding: 22px 24px; display: flex; gap: 16px; align-items: center; }
+  .verdict.genuine { background: var(--good-bg); color: var(--good); }
+  .verdict.suspicious { background: var(--warn-bg); color: var(--warn); }
+  .verdict.likely_fake { background: var(--bad-bg); color: var(--bad); }
+  .verdict svg { flex: none; }
+  .verdict .label { font-size: 26px; font-weight: 800; line-height: 1.2; }
+  .verdict .line { color: var(--text); margin-top: 2px; }
+  .meta { padding: 16px 24px; display: grid; gap: 6px; border-bottom: 1px solid var(--border); font-size: 15px; }
+  .meta .k { color: var(--muted); }
+  .host { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+  .score { display: flex; align-items: center; gap: 10px; }
+  .bar { flex: 1; max-width: 220px; height: 8px; background: var(--chip); border-radius: 99px; overflow: hidden; }
+  .bar span { display: block; height: 100%; border-radius: 99px; }
+  section { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+  section:last-child { border-bottom: 0; }
+  h2 { font-size: 17px; margin: 0 0 10px; }
+  .why ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 16px; }
+  .source { margin-top: 12px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .source .spinner { width: 14px; height: 14px; border-width: 2px; }
+  .shot img { width: 100%; max-width: 420px; border: 1px solid var(--border); border-radius: 10px; cursor: zoom-in; display: block; }
+  .gemma { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  details summary { cursor: pointer; font-weight: 600; }
+  .sig { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin-top: 12px; font-size: 14px; align-items: baseline; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; text-align: center; white-space: nowrap; font-family: ui-monospace, Menlo, monospace; }
+  .tag.high { background: var(--bad-bg); color: var(--bad); }
+  .tag.medium { background: var(--warn-bg); color: var(--warn); }
+  .tag.low, .tag.info { background: var(--chip); color: var(--muted); }
+  .tag.good { background: var(--good-bg); color: var(--good); }
+  .code { color: var(--muted); font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .skipped { margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .error { padding: 20px 24px; color: var(--bad); }
+  dialog { border: 0; padding: 0; border-radius: 12px; max-width: 95vw; background: var(--card); }
+  dialog img { display: block; max-width: 95vw; max-height: 90vh; }
+  dialog::backdrop { background: rgba(0, 0, 0, .7); }
+  footer { margin-top: 32px; font-size: 13px; color: var(--muted); text-align: center; }
+  @media (max-width: 520px) {
+    form { flex-direction: column; }
+    .btn { padding: 14px; }
+    .verdict { padding: 18px 16px; }
+    .meta, section { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><circle cx="11" cy="11" r="3"/><path d="M13.2 13.2L16 16"/></svg>
+      <span data-t="brand">Look-Alike Detector</span>
+    </div>
+    <div class="langs" role="group" aria-label="Language">
+      <button data-lang="en">English</button>
+      <button data-lang="hi">हिंदी</button>
+      <button data-lang="mr">मराठी</button>
+    </div>
+  </header>
+
+  <h1 data-t="title"></h1>
+  <p class="sub" data-t="subtitle"></p>
+
+  <form id="form">
+    <input id="url" type="text" autocomplete="off" spellcheck="false" inputmode="url">
+    <button class="btn" id="go" type="submit" data-t="check"></button>
+  </form>
+  <div class="examples">
+    <span data-t="try"></span>
+    <button type="button" data-url="http://localhost:8001/sbi/">SBI <small>· demo fake</small></button>
+    <button type="button" data-url="http://localhost:8001/incometax/">Income Tax <small>· demo fake</small></button>
+    <button type="button" data-url="http://localhost:8001/aadhaar/">Aadhaar <small>· demo fake</small></button>
+    <button type="button" data-url="https://www.onlinesbi.sbi">onlinesbi.sbi <small>· real</small></button>
+    <button type="button" data-url="https://onlinesbl.com">onlinesbl.com</button>
+    <button type="button" data-url="https://sbi.secure-login.xyz">sbi.secure-login.xyz</button>
+  </div>
+
+  <div id="out"></div>
+
+  <footer data-t="footer"></footer>
+</div>
+<dialog id="zoom"><img alt=""></dialog>
+
+<script>
+const T = {
+  en: {
+    brand: "Look-Alike Detector",
+    title: "Is this website real or a look-alike?",
+    subtitle: "Paste the link of a bank or government website. We check the address, the page and its look, and tell you in plain words.",
+    placeholder: "Paste a website address, e.g. onlinesbi.sbi",
+    check: "Check", try: "Try:",
+    steps: ["Checking the address…", "Opening the page…", "Looking at the page with Gemma 4…"],
+    verdict: { genuine: "Genuine", suspicious: "Suspicious", likely_fake: "Likely fake" },
+    lineOfficial: "This is the official website of {brand}.",
+    lineGenuine: "No warning signs found.",
+    lineSuspicious: "Be careful. Don't type any details until you are sure.",
+    lineFake: "This looks like a copy of {brand}. Don't enter any details.",
+    lineFakeNoBrand: "This looks like a fake website. Don't enter any details.",
+    website: "Website", endedAt: "Ended up at", risk: "Risk score",
+    why: "Why?", writing: "Gemma 4 is writing a simple explanation…",
+    byModel: "Explained by Gemma 4 (open-weight AI)", byFallback: "Basic explanation (AI not available right now)",
+    shot: "What the page looks like",
+    gemmaSaw: "Gemma 4 recognises: {brand} ({conf}% sure)", gemmaNone: "Gemma 4 recognises: no known bank or government brand",
+    details: "Technical details", skipped: "Checks skipped",
+    error: "Something went wrong. Please try again.", empty: "Please enter a website address.",
+    footer: "Runs on Gemma 4, an open-weight AI model · Open source (MIT) · The AI never decides the verdict on its own"
+  },
+  hi: {
+    brand: "नकली वेबसाइट पहचानें",
+    title: "यह वेबसाइट असली है या नकली?",
+    subtitle: "किसी बैंक या सरकारी वेबसाइट का लिंक डालें। हम पता, पेज और उसका रूप जाँचकर आसान भाषा में बताएँगे।",
+    placeholder: "वेबसाइट का पता डालें, जैसे onlinesbi.sbi",
+    check: "जाँचें", try: "आज़माएँ:",
+    steps: ["पता जाँच रहे हैं…", "पेज खोल रहे हैं…", "Gemma 4 से पेज देख रहे हैं…"],
+    verdict: { genuine: "असली", suspicious: "संदिग्ध", likely_fake: "शायद नकली" },
+    lineOfficial: "यह {brand} की आधिकारिक वेबसाइट है।",
+    lineGenuine: "कोई चेतावनी संकेत नहीं मिला।",
+    lineSuspicious: "सावधान रहें। पक्का होने तक कोई जानकारी न डालें।",
+    lineFake: "यह {brand} की नकल लगती है। कोई भी जानकारी न डालें।",
+    lineFakeNoBrand: "यह नकली वेबसाइट लगती है। कोई भी जानकारी न डालें।",
+    website: "वेबसाइट", endedAt: "आखिर में खुली", risk: "जोखिम स्कोर",
+    why: "क्यों?", writing: "Gemma 4 आसान भाषा में समझा रहा है…",
+    byModel: "Gemma 4 (ओपन AI मॉडल) द्वारा समझाया गया", byFallback: "सामान्य जानकारी (AI अभी उपलब्ध नहीं)",
+    shot: "पेज कैसा दिखता है",
+    gemmaSaw: "Gemma 4 को दिखा: {brand} ({conf}% यकीन)", gemmaNone: "Gemma 4 को कोई बैंक या सरकारी ब्रांड नहीं दिखा",
+    details: "तकनीकी जानकारी", skipped: "छोड़ी गई जाँच",
+    error: "कुछ गलत हुआ। कृपया फिर से कोशिश करें।", empty: "कृपया वेबसाइट का पता डालें।",
+    footer: "Gemma 4 ओपन AI मॉडल पर चलता है · ओपन सोर्स (MIT) · फ़ैसला AI अकेले नहीं करता"
+  },
+  mr: {
+    brand: "बनावट वेबसाइट ओळखा",
+    title: "ही वेबसाइट खरी आहे की बनावट?",
+    subtitle: "बँक किंवा सरकारी वेबसाइटची लिंक टाका. आम्ही पत्ता, पेज आणि त्याचे रूप तपासून सोप्या भाषेत सांगू.",
+    placeholder: "वेबसाइटचा पत्ता टाका, उदा. onlinesbi.sbi",
+    check: "तपासा", try: "वापरून पाहा:",
+    steps: ["पत्ता तपासत आहोत…", "पेज उघडत आहोत…", "Gemma 4 ने पेज पाहत आहोत…"],
+    verdict: { genuine: "खरी", suspicious: "संशयास्पद", likely_fake: "बहुधा बनावट" },
+    lineOfficial: "ही {brand} ची अधिकृत वेबसाइट आहे.",
+    lineGenuine: "कोणतीही धोक्याची चिन्हे आढळली नाहीत.",
+    lineSuspicious: "सावध राहा. खात्री होईपर्यंत कोणतीही माहिती टाकू नका.",
+    lineFake: "ही {brand} ची नक्कल दिसते. कोणतीही माहिती टाकू नका.",
+    lineFakeNoBrand: "ही बनावट वेबसाइट दिसते. कोणतीही माहिती टाकू नका.",
+    website: "वेबसाइट", endedAt: "शेवटी उघडली", risk: "धोका गुण",
+    why: "का?", writing: "Gemma 4 सोप्या भाषेत समजावत आहे…",
+    byModel: "Gemma 4 (ओपन AI मॉडेल) ने समजावले", byFallback: "साधी माहिती (AI सध्या उपलब्ध नाही)",
+    shot: "पेज कसे दिसते",
+    gemmaSaw: "Gemma 4 ला दिसले: {brand} ({conf}% खात्री)", gemmaNone: "Gemma 4 ला कोणताही बँक किंवा सरकारी ब्रँड दिसला नाही",
+    details: "तांत्रिक माहिती", skipped: "वगळलेल्या तपासण्या",
+    error: "काहीतरी चुकले. कृपया पुन्हा प्रयत्न करा.", empty: "कृपया वेबसाइटचा पत्ता टाका.",
+    footer: "Gemma 4 ओपन AI मॉडेलवर चालते · ओपन सोर्स (MIT) · निर्णय AI एकटे घेत नाही"
+  }
+};
+
+const ICONS = {
+  genuine: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>',
+  suspicious: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  likely_fake: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
+};
+const SCORE_COLOR = { genuine: "var(--good)", suspicious: "var(--warn)", likely_fake: "var(--bad)" };
+
+const $ = (s) => document.querySelector(s);
+const out = $("#out");
+let lang = "en";
+let report = null;          // last /api/check result
+let explanations = {};      // lang -> {bullets, source} or {pending: true}
+let checkId = 0;            // ignore replies that belong to an older check
+let stepTimer = null;
+
+try { lang = localStorage.getItem("lang") || "en"; } catch (e) {}
+if (!T[lang]) lang = "en";
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function fill(template, vars) {
+  return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+}
+
+function setLang(l) {
+  lang = l;
+  try { localStorage.setItem("lang", l); } catch (e) {}
+  document.documentElement.lang = l;
+  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = T[l][el.dataset.t]; });
+  document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.lang === l));
+  $("#url").placeholder = T[l].placeholder;
+  if (report) { render(); requestExplanation(l); }
+}
+
+function showLoading() {
+  let i = 0;
+  const draw = () => {
+    out.innerHTML = `<div class="card loading"><div class="spinner"></div><span>${esc(T[lang].steps[Math.min(i, 2)])}</span></div>`;
+    i++;
+  };
+  draw();
+  clearInterval(stepTimer);
+  stepTimer = setInterval(draw, 2500);
+}
+
+async function runCheck(url) {
+  url = url.trim();
+  if (!url) { out.innerHTML = `<div class="card error">${esc(T[lang].empty)}</div>`; return; }
+  const id = ++checkId;
+  report = null; explanations = {};
+  $("#go").disabled = true;
+  showLoading();
+  try {
+    const res = await fetch("/api/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (id !== checkId) return;
+    report = data;
+    render();
+    requestExplanation(lang);
+  } catch (e) {
+    if (id === checkId) out.innerHTML = `<div class="card error">${esc(T[lang].error)}</div>`;
+  } finally {
+    if (id === checkId) { clearInterval(stepTimer); $("#go").disabled = false; }
+  }
+}
+
+async function requestExplanation(l) {
+  if (!report || explanations[l]) return;
+  const id = checkId;
+  explanations[l] = { pending: true };
+  const body = { host: report.host, verdict: report.verdict, brand: report.brand, signals: report.signals, lang: l };
+  try {
+    const res = await fetch("/api/explain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (id !== checkId) return;
+    explanations[l] = data;
+  } catch (e) {
+    if (id !== checkId) return;
+    explanations[l] = { bullets: report.quick_explanation[l], source: "fallback" };
+  }
+  if (l === lang) renderWhy();
+}
+
+function verdictLine(r) {
+  const t = T[lang], brand = r.brand_names[lang];
+  if (r.verdict === "genuine") return r.official_brand ? fill(t.lineOfficial, { brand }) : t.lineGenuine;
+  if (r.verdict === "suspicious") return t.lineSuspicious;
+  return brand ? fill(t.lineFake, { brand }) : t.lineFakeNoBrand;
+}
+
+function renderWhy() {
+  const box = $("#why");
+  if (!box || !report) return;
+  const ex = explanations[lang];
+  const t = T[lang];
+  const bullets = ex && ex.bullets ? ex.bullets : report.quick_explanation[lang];
+  let source;
+  if (!ex || ex.pending) source = `<div class="spinner"></div>${esc(t.writing)}`;
+  else source = esc(ex.source === "model" ? t.byModel : t.byFallback);
+  box.innerHTML = `<h2>${esc(t.why)}</h2><ul>${bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul><div class="source">${source}</div>`;
+}
+
+function render() {
+  const r = report, t = T[lang];
+  const vb = r.visual_brand;
+  let gemma = "";
+  if (vb) {
+    gemma = vb.brand
+      ? fill(t.gemmaSaw, { brand: r.visual_brand_names[lang], conf: Math.round(vb.confidence * 100) })
+      : t.gemmaNone;
+  }
+  const signals = r.signals.map((s) => `
+      <span class="tag ${esc(s.severity)}">${s.points > 0 ? "+" : ""}${s.points}</span>
+      <span>${esc(s.detail)} <span class="code">${esc(s.code)}</span></span>`).join("");
+  const skipped = r.skipped.length
+    ? `<div class="skipped"><strong>${esc(t.skipped)}:</strong><br>${r.skipped.map(esc).join("<br>")}</div>` : "";
+  const ended = r.final_url && r.final_url.replace(/\/$/, "") !== r.url.replace(/\/$/, "")
+    ? `<div><span class="k">${esc(t.endedAt)}:</span> <span class="host">${esc(r.final_url)}</span></div>` : "";
+
+  out.innerHTML = `
+    <div class="card">
+      <div class="verdict ${esc(r.verdict)}">
+        ${ICONS[r.verdict]}
+        <div><div class="label">${esc(t.verdict[r.verdict])}</div><div class="line">${esc(verdictLine(r))}</div></div>
+      </div>
+      <div class="meta">
+        <div><span class="k">${esc(t.website)}:</span> <span class="host">${esc(r.host)}</span></div>
+        ${ended}
+        <div class="score"><span class="k">${esc(t.risk)}:</span> <strong>${r.score}/100</strong>
+          <div class="bar"><span style="width:${r.score}%;background:${SCORE_COLOR[r.verdict]}"></span></div></div>
+      </div>
+      <section class="why" id="why"></section>
+      ${r.screenshot ? `<section class="shot"><h2>${esc(t.shot)}</h2><img src="${r.screenshot}" alt="${esc(t.shot)}">${gemma ? `<div class="gemma">${esc(gemma)}</div>` : ""}</section>` : ""}
+      <section><details><summary>${esc(t.details)}</summary><div class="sig">${signals}</div>${skipped}</details></section>
+    </div>`;
+  renderWhy();
+  const img = out.querySelector(".shot img");
+  if (img) img.addEventListener("click", () => { $("#zoom img").src = img.src; $("#zoom").showModal(); });
+}
+
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); runCheck($("#url").value); });
+document.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+document.querySelectorAll("[data-url]").forEach((b) => b.addEventListener("click", () => { $("#url").value = b.dataset.url; runCheck(b.dataset.url); }));
+$("#zoom").addEventListener("click", () => $("#zoom").close());
+setLang(lang);
+</script>
+</body>
+</html>

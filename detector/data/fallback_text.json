@@ -1,0 +1,147 @@
+{
+  "_about": "Plain-language text per signal code, used when the model is unavailable. {brand} is replaced with the brand name.",
+  "signals": {
+    "official_domain": {
+      "en": "This is an official website of {brand}.",
+      "hi": "यह {brand} की आधिकारिक वेबसाइट है।",
+      "mr": "ही {brand} ची अधिकृत वेबसाइट आहे."
+    },
+    "invalid_url": {
+      "en": "This is not a valid web address.",
+      "hi": "यह सही वेब पता नहीं है।",
+      "mr": "हा योग्य वेब पत्ता नाही."
+    },
+    "userinfo_trick": {
+      "en": "The address uses an '@' trick: the real website is not the one you see at the start.",
+      "hi": "पते में '@' की चाल है: शुरुआत में जो दिखता है, वह असली वेबसाइट नहीं है।",
+      "mr": "पत्त्यात '@' ची युक्ती आहे: सुरुवातीला दिसते ती खरी वेबसाइट नाही."
+    },
+    "ip_address": {
+      "en": "The address is only numbers, not a name. Real banks never do this.",
+      "hi": "पता सिर्फ़ नंबरों का है, कोई नाम नहीं। असली बैंक ऐसा कभी नहीं करते।",
+      "mr": "पत्ता फक्त आकड्यांचा आहे, नाव नाही. खऱ्या बँका असे कधीच करत नाहीत."
+    },
+    "no_https": {
+      "en": "The connection is not secure (no https). Never type a password here.",
+      "hi": "कनेक्शन सुरक्षित नहीं है (https नहीं)। यहाँ कभी पासवर्ड न डालें।",
+      "mr": "कनेक्शन सुरक्षित नाही (https नाही). इथे कधीही पासवर्ड टाकू नका."
+    },
+    "idn_host": {
+      "en": "The address uses foreign letters that look like English letters.",
+      "hi": "पते में विदेशी अक्षर हैं जो अंग्रेज़ी अक्षरों जैसे दिखते हैं।",
+      "mr": "पत्त्यात परदेशी अक्षरे आहेत जी इंग्रजी अक्षरांसारखी दिसतात."
+    },
+    "homoglyph": {
+      "en": "The address swaps look-alike letters (like l for i) to copy {brand}'s real address.",
+      "hi": "पते में मिलते-जुलते अक्षर बदले गए हैं (जैसे i की जगह l), ताकि यह {brand} जैसा लगे।",
+      "mr": "पत्त्यात सारखी दिसणारी अक्षरे बदलली आहेत (जसे i ऐवजी l), जेणेकरून तो {brand} सारखा वाटेल."
+    },
+    "typosquat": {
+      "en": "The address is a misspelling of {brand}'s real address.",
+      "hi": "यह पता {brand} के असली पते की गलत स्पेलिंग है।",
+      "mr": "हा पत्ता {brand} च्या खऱ्या पत्त्याचे चुकीचे स्पेलिंग आहे."
+    },
+    "wrong_tld": {
+      "en": "The name matches {brand}, but the ending (.com, .in …) is wrong.",
+      "hi": "नाम {brand} जैसा है, लेकिन आखिरी हिस्सा (.com, .in …) गलत है।",
+      "mr": "नाव {brand} सारखे आहे, पण शेवटचा भाग (.com, .in …) चुकीचा आहे."
+    },
+    "brand_in_domain": {
+      "en": "The address contains the name {brand}, but the website does not belong to {brand}.",
+      "hi": "पते में {brand} का नाम है, लेकिन यह वेबसाइट {brand} की नहीं है।",
+      "mr": "पत्त्यात {brand} चे नाव आहे, पण ही वेबसाइट {brand} ची नाही."
+    },
+    "brand_in_subdomain": {
+      "en": "{brand} is written at the start of the address, but the real website belongs to someone else.",
+      "hi": "पते की शुरुआत में {brand} लिखा है, लेकिन असली वेबसाइट किसी और की है।",
+      "mr": "पत्त्याच्या सुरुवातीला {brand} लिहिले आहे, पण खरी वेबसाइट दुसऱ्या कोणाची आहे."
+    },
+    "brand_in_path": {
+      "en": "{brand} appears later in the address, but the website itself is not {brand}'s.",
+      "hi": "पते में आगे {brand} लिखा है, लेकिन वेबसाइट {brand} की नहीं है।",
+      "mr": "पत्त्यात पुढे {brand} लिहिले आहे, पण वेबसाइट {brand} ची नाही."
+    },
+    "suspicious_tld": {
+      "en": "The address has a cheap ending that fake websites often use.",
+      "hi": "पते का आखिरी हिस्सा सस्ता है, जिसे नकली वेबसाइटें अक्सर इस्तेमाल करती हैं।",
+      "mr": "पत्त्याचा शेवटचा भाग स्वस्त आहे, जो बनावट वेबसाइट्स अनेकदा वापरतात."
+    },
+    "new_domain": {
+      "en": "This website was created only a few days ago. Real bank websites are many years old.",
+      "hi": "यह वेबसाइट कुछ ही दिन पहले बनी है। असली बैंक की वेबसाइटें कई साल पुरानी होती हैं।",
+      "mr": "ही वेबसाइट काही दिवसांपूर्वीच बनली आहे. खऱ्या बँकांच्या वेबसाइट्स अनेक वर्षे जुन्या असतात."
+    },
+    "young_domain": {
+      "en": "This website is less than 6 months old.",
+      "hi": "यह वेबसाइट 6 महीने से भी कम पुरानी है।",
+      "mr": "ही वेबसाइट 6 महिन्यांपेक्षा कमी जुनी आहे."
+    },
+    "bad_certificate": {
+      "en": "The website's security certificate is not valid.",
+      "hi": "वेबसाइट का सुरक्षा प्रमाणपत्र मान्य नहीं है।",
+      "mr": "वेबसाइटचे सुरक्षा प्रमाणपत्र वैध नाही."
+    },
+    "asks_password": {
+      "en": "The page asks for your password.",
+      "hi": "यह पेज आपका पासवर्ड माँगता है।",
+      "mr": "हे पेज तुमचा पासवर्ड मागते."
+    },
+    "asks_otp": {
+      "en": "The page asks for an OTP or PIN. Never share these.",
+      "hi": "यह पेज OTP या PIN माँगता है। इन्हें कभी किसी को न बताएँ।",
+      "mr": "हे पेज OTP किंवा PIN मागते. हे कधीही कोणाला सांगू नका."
+    },
+    "asks_card": {
+      "en": "The page asks for your card number or CVV.",
+      "hi": "यह पेज आपका कार्ड नंबर या CVV माँगता है।",
+      "mr": "हे पेज तुमचा कार्ड नंबर किंवा CVV मागते."
+    },
+    "asks_identity": {
+      "en": "The page asks for your Aadhaar, PAN or date of birth.",
+      "hi": "यह पेज आपका आधार, PAN या जन्मतिथि माँगता है।",
+      "mr": "हे पेज तुमचा आधार, PAN किंवा जन्मतारीख मागते."
+    },
+    "form_posts_elsewhere": {
+      "en": "Whatever you type here is sent to a different website.",
+      "hi": "आप यहाँ जो भी लिखते हैं, वह किसी दूसरी वेबसाइट पर भेजा जाता है।",
+      "mr": "तुम्ही इथे जे काही टाइप करता, ते दुसऱ्या वेबसाइटला पाठवले जाते."
+    },
+    "form_posts_email": {
+      "en": "Whatever you type here is sent to an e-mail address.",
+      "hi": "आप यहाँ जो भी लिखते हैं, वह किसी ई-मेल पते पर भेजा जाता है।",
+      "mr": "तुम्ही इथे जे काही टाइप करता, ते एका ई-मेल पत्त्यावर पाठवले जाते."
+    },
+    "form_posts_http": {
+      "en": "Whatever you type here is sent without protection (no encryption).",
+      "hi": "आप यहाँ जो भी लिखते हैं, वह बिना सुरक्षा (एन्क्रिप्शन) के भेजा जाता है।",
+      "mr": "तुम्ही इथे जे काही टाइप करता, ते सुरक्षेशिवाय (एन्क्रिप्शनशिवाय) पाठवले जाते."
+    },
+    "brand_in_page_text": {
+      "en": "The page calls itself {brand}, but it is not on {brand}'s official website.",
+      "hi": "यह पेज खुद को {brand} बताता है, लेकिन यह {brand} की आधिकारिक वेबसाइट पर नहीं है।",
+      "mr": "हे पेज स्वतःला {brand} म्हणवते, पण ते {brand} च्या अधिकृत वेबसाइटवर नाही."
+    },
+    "visual_brand_mismatch": {
+      "en": "The page is made to look like {brand}, but it is not {brand}'s website.",
+      "hi": "यह पेज {brand} जैसा दिखने के लिए बनाया गया है, लेकिन यह {brand} की वेबसाइट नहीं है।",
+      "mr": "हे पेज {brand} सारखे दिसण्यासाठी बनवले आहे, पण ही {brand} ची वेबसाइट नाही."
+    }
+  },
+  "advice": {
+    "likely_fake": {
+      "en": "Do not enter any details. Close this page and type the official address yourself.",
+      "hi": "कोई भी जानकारी न डालें। यह पेज बंद करें और आधिकारिक पता खुद टाइप करें।",
+      "mr": "कोणतीही माहिती टाकू नका. हे पेज बंद करा आणि अधिकृत पत्ता स्वतः टाइप करा."
+    },
+    "suspicious": {
+      "en": "Be careful. Check the address letter by letter before typing anything.",
+      "hi": "सावधान रहें। कुछ भी लिखने से पहले पता अक्षर-अक्षर जाँचें।",
+      "mr": "सावध राहा. काहीही टाइप करण्यापूर्वी पत्ता अक्षर-अक्षर तपासा."
+    },
+    "genuine": {
+      "en": "No warning signs found. Still, never share your OTP with anyone.",
+      "hi": "कोई चेतावनी संकेत नहीं मिला। फिर भी, अपना OTP कभी किसी को न बताएँ।",
+      "mr": "कोणतीही धोक्याची चिन्हे आढळली नाहीत. तरीही, तुमचा OTP कधीही कोणाला सांगू नका."
+    }
+  }
+}

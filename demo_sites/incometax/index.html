@@ -1,0 +1,61 @@
+<!doctype html>
+<!--
+  DEMO LOOK-ALIKE PAGE for the Look-Alike Website Detector.
+  Serve ONLY on localhost:  python -m http.server 8001 --directory demo_sites
+  The form never sends anything: onsubmit blocks it, and the action points to
+  a reserved .example domain that cannot exist.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Income Tax Department - e-Filing | Refund Status</title>
+  <style>
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f5f5f0; color: #222; }
+    .tricolour { height: 6px; background: linear-gradient(90deg, #ff9933 33%, #fff 33% 66%, #138808 66%); }
+    header { background: #fff; display: flex; align-items: center; gap: 16px; padding: 14px 32px; border-bottom: 1px solid #ddd; }
+    .emblem { width: 46px; height: 46px; border-radius: 50%; border: 3px solid #0b3d91; display: grid; place-items: center; color: #0b3d91; font-weight: bold; font-size: 12px; }
+    header h1 { font-size: 20px; margin: 0; color: #0b3d91; }
+    header small { display: block; color: #555; font-weight: normal; font-size: 13px; }
+    nav { background: #0b3d91; color: #fff; padding: 9px 32px; font-size: 14px; }
+    main { max-width: 480px; margin: 34px auto 80px; background: #fff; border-radius: 6px; padding: 26px 30px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    h2 { color: #0b3d91; margin-top: 0; font-size: 20px; }
+    .refund { background: #e8f4ea; border: 1px solid #9fd0a8; padding: 12px; border-radius: 4px; margin-bottom: 16px; }
+    .refund b { font-size: 22px; color: #137a3f; }
+    label { display: block; font-size: 14px; margin: 12px 0 4px; }
+    input { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #bbb; border-radius: 4px; }
+    .row { display: flex; gap: 10px; } .row div { flex: 1; }
+    button { margin-top: 20px; width: 100%; padding: 11px; background: #ff9933; color: #fff; border: 0; border-radius: 4px; font-size: 16px; font-weight: bold; }
+    footer { position: fixed; bottom: 0; left: 0; right: 0; background: #c00; color: #fff; text-align: center; padding: 10px; font-weight: bold; letter-spacing: .5px; }
+  </style>
+</head>
+<body>
+  <div class="tricolour"></div>
+  <header>
+    <div class="emblem" aria-hidden="true">GOI</div>
+    <h1>Income Tax Department <small>Government of India · e-Filing</small></h1>
+  </header>
+  <nav>Home · Refund Status · File ITR · Help</nav>
+
+  <main>
+    <h2>Your Income Tax Refund is Ready</h2>
+    <div class="refund">Approved refund amount: <b>₹ 15,490</b><br>Enter your details to receive it in your bank account today.</div>
+    <form action="https://itr-refund-claim.example/receive" method="post"
+          onsubmit="alert('DEMO - NOT A REAL GOVERNMENT SITE. Nothing was sent.'); return false;">
+      <label for="pan">PAN number</label>
+      <input id="pan" name="pan" placeholder="ABCDE1234F">
+      <label for="dob">Date of birth</label>
+      <input id="dob" name="dob" placeholder="DD/MM/YYYY">
+      <label for="cardno">Debit card number (for refund credit)</label>
+      <input id="cardno" name="card_number" inputmode="numeric">
+      <div class="row">
+        <div><label for="exp">Expiry</label><input id="exp" name="expiry" placeholder="MM/YY"></div>
+        <div><label for="cvv">CVV</label><input id="cvv" name="cvv" type="password" inputmode="numeric"></div>
+      </div>
+      <button type="submit">Claim Refund</button>
+    </form>
+  </main>
+
+  <footer>DEMO – NOT A REAL GOVERNMENT SITE · Look-Alike Website Detector test page</footer>
+</body>
+</html>

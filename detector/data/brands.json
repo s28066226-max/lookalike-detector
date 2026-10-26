@@ -1,0 +1,73 @@
+{
+  "_about": "Brand -> official domains. A host is official if it equals an official domain or is a subdomain of one (netbanking.hdfcbank.com). An entry without a dot (\"sbi\") is a brand top-level domain: every *.sbi host belongs to that brand. 'keywords' are matched against the URL to spot the brand name on someone else's domain. Only list domains you have verified.",
+  "sbi": {
+    "display_names": ["State Bank of India", "SBI", "भारतीय स्टेट बैंक", "YONO SBI"],
+    "type": "bank",
+    "official_domains": ["sbi.co.in", "onlinesbi.sbi", "onlinesbi.com", "sbi.bank.in", "sbi"],
+    "keywords": ["sbi", "onlinesbi", "yono", "statebank"],
+    "logo_keywords": ["blue circle with keyhole", "SBI", "YONO"]
+  },
+  "hdfc": {
+    "display_names": ["HDFC Bank", "एचडीएफसी बैंक"],
+    "type": "bank",
+    "official_domains": ["hdfcbank.com", "hdfc.bank.in"],
+    "keywords": ["hdfc", "hdfcbank"],
+    "logo_keywords": ["red and blue square", "HDFC BANK"]
+  },
+  "icici": {
+    "display_names": ["ICICI Bank", "आईसीआईसीआई बैंक"],
+    "type": "bank",
+    "official_domains": ["icicibank.com", "icici.bank.in"],
+    "keywords": ["icici", "icicibank"],
+    "logo_keywords": ["orange and maroon 'i' logo", "ICICI Bank"]
+  },
+  "axis": {
+    "display_names": ["Axis Bank", "एक्सिस बैंक"],
+    "type": "bank",
+    "official_domains": ["axisbank.com", "axis.bank.in"],
+    "keywords": ["axis", "axisbank"],
+    "logo_keywords": ["burgundy triangle 'A'", "AXIS BANK"]
+  },
+  "kotak": {
+    "display_names": ["Kotak Mahindra Bank", "Kotak", "कोटक महिंद्रा बैंक"],
+    "type": "bank",
+    "official_domains": ["kotak.com", "kotak.bank.in"],
+    "keywords": ["kotak", "kotak811"],
+    "logo_keywords": ["red and blue infinity", "kotak"]
+  },
+  "pnb": {
+    "display_names": ["Punjab National Bank", "PNB", "पंजाब नैशनल बैंक"],
+    "type": "bank",
+    "official_domains": ["pnbindia.in", "netpnb.com", "pnb.bank.in"],
+    "keywords": ["pnb", "pnbindia", "netpnb", "punjabnational"],
+    "logo_keywords": ["maroon and yellow PNB logo", "punjab national bank"]
+  },
+  "irctc": {
+    "display_names": ["IRCTC", "Indian Railway Catering and Tourism Corporation", "आईआरसीटीसी"],
+    "type": "government",
+    "official_domains": ["irctc.co.in", "irctc.com"],
+    "keywords": ["irctc", "indianrail"],
+    "logo_keywords": ["IRCTC logo", "Indian Railways"]
+  },
+  "uidai": {
+    "display_names": ["UIDAI", "Aadhaar", "भारतीय विशिष्ट पहचान प्राधिकरण", "आधार"],
+    "type": "government",
+    "official_domains": ["uidai.gov.in"],
+    "keywords": ["uidai", "aadhaar", "aadhar", "myaadhaar"],
+    "logo_keywords": ["Aadhaar sun-and-fingerprint logo", "Government of India emblem"]
+  },
+  "incometax": {
+    "display_names": ["Income Tax Department", "Income Tax e-Filing", "आयकर विभाग"],
+    "type": "government",
+    "official_domains": ["incometax.gov.in", "incometaxindia.gov.in"],
+    "keywords": ["incometax", "itrefund"],
+    "logo_keywords": ["Income Tax Department logo", "Government of India emblem"]
+  },
+  "epfo": {
+    "display_names": ["EPFO", "Employees' Provident Fund Organisation", "कर्मचारी भविष्य निधि संगठन"],
+    "type": "government",
+    "official_domains": ["epfindia.gov.in"],
+    "keywords": ["epfo", "epfindia", "pfbalance"],
+    "logo_keywords": ["EPFO logo", "Government of India emblem"]
+  }
+}

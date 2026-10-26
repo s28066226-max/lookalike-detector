@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Secrets
+.env
+
+# Generated files
+screenshots/
+.DS_Store
+
+# Editor settings
+.vscode/

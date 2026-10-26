@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  DEMO LOOK-ALIKE PAGE for the Look-Alike Website Detector.
+  Serve ONLY on localhost:  python -m http.server 8001 --directory demo_sites
+  The form never sends anything: onsubmit blocks it, and the action points to
+  a reserved .example domain that cannot exist.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>State Bank of India - Personal Internet Banking</title>
+  <style>
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f2f6fb; color: #222; }
+    header { background: #1a4f9c; color: #fff; display: flex; align-items: center; gap: 14px; padding: 14px 32px; }
+    .logo { width: 44px; height: 44px; border-radius: 50%; background: #fff; position: relative; }
+    .logo::after { content: ""; position: absolute; left: 18px; top: 22px; width: 8px; height: 22px; background: #1a4f9c; }
+    .logo::before { content: ""; position: absolute; left: 15px; top: 13px; width: 14px; height: 14px; border-radius: 50%; background: #1a4f9c; }
+    header h1 { font-size: 22px; margin: 0; }
+    header small { display: block; font-weight: normal; opacity: .85; }
+    main { max-width: 420px; margin: 40px auto; background: #fff; border-radius: 8px; padding: 28px 32px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    h2 { color: #1a4f9c; margin-top: 0; }
+    .notice { background: #fff4e5; border-left: 4px solid #f0a000; padding: 10px; font-size: 14px; margin-bottom: 18px; }
+    label { display: block; font-size: 14px; margin: 12px 0 4px; }
+    input { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #bbb; border-radius: 4px; }
+    button { margin-top: 20px; width: 100%; padding: 11px; background: #1a4f9c; color: #fff; border: 0; border-radius: 4px; font-size: 16px; }
+    footer { position: fixed; bottom: 0; left: 0; right: 0; background: #c00; color: #fff; text-align: center; padding: 10px; font-weight: bold; letter-spacing: .5px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo" aria-hidden="true"></div>
+    <h1>State Bank of India <small>Personal Internet Banking</small></h1>
+  </header>
+
+  <main>
+    <h2>Login to OnlineSBI</h2>
+    <div class="notice">Your KYC has expired. Verify now to avoid account suspension within 24 hours.</div>
+    <form action="https://sbi-kyc-verify.example/collect" method="post"
+          onsubmit="alert('DEMO - NOT A REAL BANK. Nothing was sent.'); return false;">
+      <label for="user">Username</label>
+      <input id="user" name="username" autocomplete="username">
+      <label for="pass">Password</label>
+      <input id="pass" name="password" type="password">
+      <label for="otp">Enter OTP sent to your mobile</label>
+      <input id="otp" name="otp" inputmode="numeric">
+      <label for="card">ATM / Debit card number</label>
+      <input id="card" name="card_number" inputmode="numeric">
+      <button type="submit">Login &amp; Verify KYC</button>
+    </form>
+  </main>
+
+  <footer>DEMO – NOT A REAL BANK · Look-Alike Website Detector test page</footer>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<!--
+  DEMO LOOK-ALIKE PAGE for the Look-Alike Website Detector.
+  Serve ONLY on localhost:  python -m http.server 8001 --directory demo_sites
+  The form never sends anything: onsubmit blocks it, and the action is a
+  mailto: address on a reserved .example domain.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aadhaar Update - Unique Identification Authority of India</title>
+  <style>
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fffaf3; color: #222; }
+    header { background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; border-bottom: 4px solid #e8892b; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .sun { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #f6b21b 35%, #e8892b 36% 50%, transparent 51%); border: 2px dashed #c0392b; }
+    header h1 { font-size: 20px; margin: 0; color: #7a2e0e; }
+    header small { display: block; font-weight: normal; color: #666; font-size: 13px; }
+    .hindi { color: #7a2e0e; font-size: 15px; }
+    main { max-width: 460px; margin: 34px auto 80px; background: #fff; border: 1px solid #f0d9bf; border-radius: 8px; padding: 26px 30px; }
+    h2 { color: #c0392b; margin-top: 0; font-size: 20px; }
+    .alert { background: #fdecea; color: #a61b1b; padding: 10px; border-radius: 4px; font-size: 14px; margin-bottom: 14px; }
+    label { display: block; font-size: 14px; margin: 12px 0 4px; }
+    input { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #bbb; border-radius: 4px; }
+    button { margin-top: 20px; width: 100%; padding: 11px; background: #c0392b; color: #fff; border: 0; border-radius: 4px; font-size: 16px; }
+    footer { position: fixed; bottom: 0; left: 0; right: 0; background: #c00; color: #fff; text-align: center; padding: 10px; font-weight: bold; letter-spacing: .5px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="sun" aria-hidden="true"></div>
+      <h1>Aadhaar <small>Unique Identification Authority of India</small></h1>
+    </div>
+    <div class="hindi">आधार – आम आदमी का अधिकार</div>
+  </header>
+
+  <main>
+    <h2>Urgent: Update your Aadhaar KYC</h2>
+    <div class="alert">Your Aadhaar will be deactivated in 48 hours if not linked with your bank account.</div>
+    <form action="mailto:kyc-desk@aadhaar-update.example" method="post"
+          onsubmit="alert('DEMO - NOT A REAL GOVERNMENT SITE. Nothing was sent.'); return false;">
+      <label for="aadhaar">Aadhaar number</label>
+      <input id="aadhaar" name="aadhaar" inputmode="numeric" placeholder="XXXX XXXX XXXX">
+      <label for="mobile">Registered mobile number</label>
+      <input id="mobile" name="mobile" inputmode="numeric">
+      <label for="otp">OTP</label>
+      <input id="otp" name="otp" inputmode="numeric">
+      <button type="submit">Update KYC</button>
+    </form>
+  </main>
+
+  <footer>DEMO – NOT A REAL GOVERNMENT SITE · Look-Alike Website Detector test page</footer>
+</body>
+</html>
