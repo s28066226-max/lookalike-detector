@@ -4,6 +4,8 @@
 
 **Paste a link → find out if it's the real bank or government website or a look-alike, with the warning signs explained in plain words in 7 Indian languages: English, हिंदी, मराठी, বাংলা, ગુજરાતી, தமிழ், తెలుగు.**
 
+**🔗 Live demo: https://lookalike-detector-jw5d.onrender.com** (free hosting: the first visit after a quiet period takes about a minute to wake up, and each check takes 30–60 s. On a laptop with Ollama it takes about 10 s.)
+
 Built at Hacktoberfest Hack Day (problem statement #10) for the **Main Track: Best Open-Source AI Project**. The AI part runs on **Gemma 4**, Google's open-weight model (Apache 2.0). It runs either through the Gemini API or **fully offline on your own laptop through Ollama**, so no data leaves the machine.
 
 ![Fake SBI page detected as likely fake, with a plain-language explanation from Gemma 4](docs/images/fake-sbi-en.png)
